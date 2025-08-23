@@ -1,0 +1,27 @@
+{
+  "name": "acfunlive-backend-js",
+  "version": "1.0.0",
+  "description": "AcFun Live Backend in Node.js",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "dev": "nodemon main.js"
+  },
+  "keywords": [
+    "acfun",
+    "live",
+    "backend"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "ws": "^8.16.0",
+    "axios": "^1.6.7",
+    "winston": "^3.11.0",
+    "fast-json-stringify": "^5.16.1",
+    "dotenv": "^16.4.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  }
+}

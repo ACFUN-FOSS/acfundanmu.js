@@ -1,30 +1,27 @@
-acfunlive-backend
-client
-client1
-client2
-tests/forward/forward
-cmd/cmd
-*.json
-*.log
-*.txt
-*.bak
-*.1
-*.2
-*.3
-*.panic
+# 依赖目录
+node_modules/
 
-# Binaries for programs and plugins
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
+# 日志文件
+logs/
 
-# Test binary, built with `go test -c`
-*.test
+# 环境变量文件
+.env
 
-# Output of the go coverage tool, specifically when used with LiteIDE
-*.out
+# 编译产物
+build/
 
-# Dependency directories (remove the comment below to include it)
-# vendor/
+# 临时文件
+*.tmp
+*.temp
+
+# 编辑器配置
+.vscode/
+.idea/
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# npm 相关文件
+package-lock.json
+npm-debug.log*
