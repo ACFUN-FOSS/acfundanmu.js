@@ -217,7 +217,7 @@ describe('BadgeService', () => {
       
       // 验证返回错误信息
       expect(result.success).toBe(false);
-      expect(result.error).toBe('请先设置认证token');
+      expect(result.error).toBe('缺少认证token，请先调用setAuthToken方法设置token');
     }, 5000); // 5秒超�?  });
 
   describe('getWornBadge', () => {
@@ -272,7 +272,7 @@ describe('BadgeService', () => {
       
       // 验证返回错误信息
       expect(result.success).toBe(false);
-      expect(result.error).toBe('请先设置认证token');
+      expect(result.error).toBe('缺少认证token，请先调用setAuthToken方法设置token');
     }, 5000); // 5秒超�?  });
 
   describe('wearBadge', () => {
@@ -308,7 +308,7 @@ describe('BadgeService', () => {
       
       // 验证返回错误信息
       expect(result.success).toBe(false);
-      expect(result.error).toBe('请先设置认证token');
+      expect(result.error).toBe('缺少认证token，请先调用setAuthToken方法设置token');
     }, 5000); // 5秒超�?  });
 
   describe('unwearBadge', () => {
@@ -341,6 +341,6 @@ describe('BadgeService', () => {
       
       // 验证返回错误信息
       expect(result.success).toBe(false);
-      expect(result.error).toBe('请先设置认证token');
+      expect(result.error).toBe('缺少认证token，请先调用setAuthToken方法设置token');
     }, 5000); // 5秒超�?  });
 });

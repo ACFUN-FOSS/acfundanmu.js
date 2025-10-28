@@ -11,7 +11,7 @@ import { ApiResponse, TokenInfo } from '../types';
 export function checkAuth(httpClient: HttpClient): string | null {
   const authHeader = httpClient.getAuthHeader();
   if (!authHeader) {
-    return '请先设置认证token';
+    return '缺少认证token，请先调用setAuthToken方法设置token';
   }
   return null;
 }
