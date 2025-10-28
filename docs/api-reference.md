@@ -1,0 +1,188 @@
+# API 参考文档
+
+完整的 AcFun 直播 API 接口参考文档。
+
+## 通用响应格式
+
+所有 API 接口返回统一的响应格式：
+
+```typescript
+interface ApiResponse<T> {
+  success: boolean;    // 请求是否成功
+  data?: T;           // 成功时返回的数据
+  error?: string;     // 失败时的错误消息
+  code?: number;      // 错误码(可选)
+}
+```
+
+## 认证 API
+
+### qrLogin - 获取登录二维码
+
+获取用于扫码登录的二维码。
+
+**请求参数：** 无
+
+**响应数据：**
+```typescript
+interface QRCodeLoginResponse {
+  qrCode: string;           // Base64编码的二维码图片
+  expiresIn: number;        // 过期时间(毫秒)
+  qrLoginToken: string;     // 登录令牌
+  qrLoginSignature: string; // 登录签名
+}
+```
+
+**示例：**
+```typescript
+const result = await api.auth.qrLogin();
+console.log('二维码:', result.data.qrCode);
+```
+
+### checkQrLoginStatus - 检查登录状态
+
+轮询检查用户是否已扫码确认登录。
+
+**请求参数：** 无（使用内部保存的令牌）
+
+**响应数据：**
+```typescript
+interface AuthResponse {
+  userId: string;
+  userName: string;
+  token: string;  // JSON字符串格式的TokenInfo
+}
+```
+
+### setAuthToken - 设置认证令牌
+
+设置用于后续 API 调用的认证 Token。
+
+**参数：**
+- `token: string` - 认证Token
+
+**返回：** 无
+
+## 弹幕 API
+
+### startDanmu - 启动弹幕
+
+连接直播间并开始接收弹幕消息。
+
+**参数：**
+- `liverUID: string` - 主播UID
+- `callback: (event: DanmuMessage) => void` - 弹幕回调函数
+
+**响应：**
+```typescript
+{ sessionId: string }
+```
+
+### stopDanmu - 停止弹幕
+
+停止指定会话的弹幕接收。
+
+**参数：**
+- `sessionId: string`
+
+### 会话管理接口
+
+#### getAllSessions - 获取所有会话
+
+**响应：**
+```typescript
+SessionSummary[] {
+  sessionId, liverUID, state, createdAt, messageCount
+}
+```
+
+#### getSessionDetail - 获取会话详情
+
+**参数：** `sessionId: string`
+
+#### getSessionsByState - 按状态筛选
+
+**参数：** `state: DanmuSessionState`
+
+#### getSessionStatistics - 全局统计
+
+**响应：**
+```typescript
+GlobalStatistics {
+  totalSessions, activeSessions, 
+  errorSessions, totalMessagesReceived
+}
+```
+
+#### pauseSessions - 批量暂停
+
+**参数：** `sessionIds: string[]`
+
+#### resumeSessions - 批量恢复
+
+**参数：** `sessionIds: string[]`
+
+#### cleanupIdleSessions - 清理空闲
+
+**参数：** `idleTimeout: number`（毫秒）
+
+## 直播 API
+
+### checkLivePermission - 检查权限
+
+检查账号是否有开播权限。
+
+**响应：** `{ liveAuth: boolean }`
+
+### getStreamUrl - 获取推流地址
+
+**参数：** `liveId?: string`
+
+**响应：**
+```typescript
+StreamUrl {
+  rtmpUrl, streamKey, expiresAt
+}
+```
+
+### startLiveStream - 开始直播
+
+**参数：**
+- `title: string` - 直播标题
+- `coverFile: string` - 封面文件
+- `streamName: string` - 流名称
+- `portrait: boolean` - 是否竖屏
+- `panoramic: boolean` - 是否全景
+- `categoryID: number` - 分类ID
+- `subCategoryID: number` - 子分类ID
+
+### stopLiveStream - 停止直播
+
+**参数：** `liveId: string`
+
+### getHotLives - 获取热门直播
+
+**参数：**
+- `category?: string` - 分类
+- `page?: number` - 页码(默认0)
+- `size?: number` - 每页数量(默认20)
+
+## 用户 API
+
+### getUserInfo - 获取用户信息
+
+**参数：** `userId: string`
+
+**响应：** `UserProfile`
+
+### getWalletInfo - 获取钱包信息
+
+**响应：** `WalletInfo`
+
+## 礼物 API
+
+### getAllGiftList - 获取礼物列表
+
+**响应：** `GiftInfo[]`
+
+详细数据结构请参阅 [数据模型文档](./data-models.md)。

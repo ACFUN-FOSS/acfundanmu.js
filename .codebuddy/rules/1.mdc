@@ -1,0 +1,239 @@
+---
+description: 
+alwaysApply: true
+enabled: true
+updatedAt: 2025-10-28T13:42:55.815Z
+provider: 
+---
+
+# API 开发规范
+
+## 数据规范
+
+### 禁止使用模拟数据
+在所有 API 接口开发中，严格禁止使用模拟数据（Mock Data）。所有接口必须返回真实的业务数据。
+
+#### 禁止的做法
+// ❌ 错误示例：使用模拟数据
+export async function getUserInfo(userId: string) {
+  // 禁止返回硬编码的模拟数据
+  return {
+    id: '123',
+    name: 'Mock User',
+    email: 'mock@example.com'
+  };
+}
+
+// ❌ 错误示例：使用假数据生成器
+import { faker } from '@faker-js/faker';
+
+export async function getUsers() {
+  return Array.from({ length: 10 }, () => ({
+    id: faker.string.uuid(),
+    name: faker.person.fullName(),
+    email: faker.internet.email()
+  }));
+}
+
+#### 正确的做法
+// ✅ 正确示例：从数据库或外部服务获取真实数据
+export async function getUserInfo(userId: string) {
+  const user = await userRepository.findById(userId);
+  return user;
+}
+
+// ✅ 正确示例：调用真实的外部 API
+export async function getUsers() {
+  const users = await database.users.findAll();
+  return users;
+}
+
+### 测试环境说明
+- 开发测试时应使用测试数据库或测试环境的真实数据
+- 如需要测试数据，应通过数据迁移脚本或测试数据初始化脚本创建
+- 单元测试中可以使用 Mock，但生产代码中禁止使用模拟数据
+
+### 异常情况处理
+当暂时无法获取真实数据时：
+1. 明确标注 TODO 注释，说明原因和计划完成时间
+2. 抛出适当的异常，不要返回假数据
+3. 在代码审查时优先处理这类问题
+
+// 临时处理示例
+export async function getUserInfo(userId: string) {
+  // TODO: 等待数据库表创建完成后接入真实数据 - 预计完成时间：2024-01-15
+  throw new Error('User service not implemented yet');
+}
+
+
+# 测试规范指南
+
+## 接口测试输出格式
+
+### 标准输出格式
+参考 `UserService.test.ts` 第57-59行，所有接口测试需要按照以下格式打印结果：
+
+console.log('请求参数:', params);
+console.log('响应状态:', response.status);
+console.log('返回数据:', response.data);
+
+### 示例
+it('should get user info successfully', async () => {
+  const userId = '123456';
+  const params = { userId };
+  
+  const response = await userService.getUserInfo(params);
+  
+  console.log('请求参数:', params);
+  console.log('响应状态:', response.status);
+  console.log('返回数据:', response.data);
+  
+  expect(response.status).toBe(200);
+});
+
+## 测试文件命名规范
+
+### 文件命名格式
+- 单元测试：`[ServiceName].test.ts`
+- 集成测试：`[ModuleName].integration.test.ts`
+- E2E测试：`[FeatureName].e2e.test.ts`
+
+### 文件组织结构
+tests/
+├── unit/
+│   ├── UserService.test.ts
+│   ├── AuthService.test.ts
+│   └── ...
+├── integration/
+│   ├── User.integration.test.ts
+│   └── ...
+└── e2e/
+    ├── Login.e2e.test.ts
+    └── ...
+
+### 命名规范要求
+1. 使用 PascalCase 命名服务/模块名称
+2. 测试文件必须以 `.test.ts` 结尾
+3. 保持与被测试文件相同的命名前缀
+4. 放置在对应的测试目录中
+
+### 示例对照
+| 源文件 | 测试文件 |
+|--------|----------|
+| `UserService.ts` | `UserService.test.ts` |
+| `AuthService.ts` | `AuthService.test.ts` |
+| `PaymentModule.ts` | `Payment.integration.test.ts` |
+
+
+## 测试执行控制
+
+### 单个用例执行规范
+每次执行测试时，仅允许执行一个接口的测试用例，需要使用 `skip` 跳过其余所有用例。
+
+### 使用方法
+使用 `it.skip()` 或 `describe.skip()` 来跳过不需要执行的测试用例：
+
+describe('UserService', () => {
+  // 当前需要执行的测试用例
+  it('should get user info successfully', async () => {
+    const userId = '123456';
+    const params = { userId };
+    
+    const response = await userService.getUserInfo(params);
+    
+    console.log('请求参数:', params);
+    console.log('响应状态:', response.status);
+    console.log('返回数据:', response.data);
+    
+    expect(response.status).toBe(200);
+  });
+
+  // 跳过其他测试用例
+  it.skip('should update user info', async () => {
+    // ...
+  });
+
+  it.skip('should delete user', async () => {
+    // ...
+  });
+});
+
+### 批量跳过示例
+describe('UserService', () => {
+  it('should get user info successfully', async () => {
+    // 执行的测试用例
+  });
+
+  describe.skip('Other tests', () => {
+    it('should update user info', async () => {
+      // 跳过
+    });
+
+    it('should delete user', async () => {
+      // 跳过
+    });
+  });
+});
+
+### 注意事项
+1. 每次测试执行前，确保只有一个 `it()` 没有 `skip`
+2. 所有其他测试用例必须使用 `it.skip()` 标记
+3. 测试完成后，记得恢复其他用例的执行状态
+4. 可以使用 `describe.skip()` 批量跳过整组测试
+
+
+
+## 测试环境规范
+
+### 生产环境测试要求
+所有测试用例必须直接使用生产环境进行测试，严格禁止使用测试环境或模拟数据。
+
+### 禁止的做法
+// ❌ 错误示例：使用测试环境
+const testConfig = {
+  apiUrl: 'https://test-api.example.com',
+  database: 'test_db'
+};
+
+// ❌ 错误示例：使用模拟数据
+it('should get user info', async () => {
+  const mockData = {
+    id: '123',
+    name: 'Test User'
+  };
+  // 使用模拟数据进行测试
+});
+
+### 正确的做法
+// ✅ 正确示例：使用生产环境配置
+const prodConfig = {
+  apiUrl: process.env.PROD_API_URL,
+  database: process.env.PROD_DATABASE
+};
+
+// ✅ 正确示例：调用真实的生产接口
+it('should get user info successfully', async () => {
+  const userId = '123456';
+  const params = { userId };
+  
+  // 调用真实的生产环境接口
+  const response = await userService.getUserInfo(params);
+  
+  console.log('请求参数:', params);
+  console.log('响应状态:', response.status);
+  console.log('返回数据:', response.data);
+  
+  expect(response.status).toBe(200);
+});
+
+### 环境配置要求
+1. 测试配置必须指向生产环境
+2. 使用真实的生产数据库连接
+3. 调用真实的生产 API 接口
+4. 禁止使用任何形式的 Mock 或 Stub
+
+### 注意事项
+1. 测试前确认生产环境配置正确
+2. 谨慎处理可能产生副作用的操作（如删除、更新）
+3. 测试数据应使用真实但不影响业务的数据
+4. 确保有足够的权限访问生产环境资源

@@ -1,0 +1,12 @@
+---
+description: 
+alwaysApply: true
+enabled: true
+updatedAt: 2025-10-28T13:43:46.878Z
+provider: 
+---
+
+# 提交规范
+在每次执行新的命令前，都需要先提交当前的代码变更。
+- 提交时需要包含有意义的提交信息，描述变更的内容。
+- 提交使用Git的命令进行提交。

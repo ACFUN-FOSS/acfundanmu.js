@@ -1,0 +1,163 @@
+# 使用示例文档
+
+本文档提供常见业务场景的完整示例代码。
+
+## 场景1：监控直播间弹幕
+
+```typescript
+import { AcFunLiveApi } from 'acfunlive-http-api';
+
+async function monitorDanmu() {
+  const api = new AcFunLiveApi({
+    baseUrl: 'https://api.kuaishouzt.com'
+  });
+
+  // 登录（假设已有token）
+  api.setAuthToken(savedToken);
+
+  // 启动弹幕监控
+  const result = await api.danmu.startDanmu('主播UID', (event) => {
+    if ('content' in event) {
+      console.log(`💬 ${event.danmuInfo.userInfo.nickname}: ${event.content}`);
+    } else if ('giftDetail' in event) {
+      console.log(`🎁 ${event.danmuInfo.userInfo.nickname} 送出 ${event.giftDetail.giftName}`);
+    }
+  });
+
+  console.log('弹幕监控已启动:', result.data.sessionId);
+}
+```
+
+## 场景2：同时监控多个直播间
+
+```typescript
+async function monitorMultipleLives() {
+  const api = new AcFunLiveApi({
+    baseUrl: 'https://api.kuaishouzt.com'
+  });
+
+  api.setAuthToken(token);
+
+  const liverUIDs = ['123456', '789012', '345678'];
+  const sessions = [];
+
+  // 为每个主播启动监控
+  for (const uid of liverUIDs) {
+    const result = await api.danmu.startDanmu(uid, (event) => {
+      if ('content' in event) {
+        console.log(`[主播${uid}] ${event.danmuInfo.userInfo.nickname}: ${event.content}`);
+      }
+    });
+    sessions.push(result.data.sessionId);
+  }
+
+  // 查看所有会话状态
+  const stats = await api.danmu.getSessionStatistics();
+  console.log('活跃会话数:', stats.data.activeSessions);
+
+  // 定期清理空闲会话
+  setInterval(async () => {
+    await api.danmu.cleanupIdleSessions(1800000); // 30分钟
+  }, 300000); // 每5分钟
+}
+```
+
+## 场景3：完整的开播流程
+
+```typescript
+async function startLive() {
+  const api = new AcFunLiveApi({
+    baseUrl: 'https://api.kuaishouzt.com'
+  });
+
+  // 1. 检查开播权限
+  const permission = await api.live.checkLivePermission();
+  if (!permission.data.liveAuth) {
+    console.error('没有开播权限');
+    return;
+  }
+
+  // 2. 获取推流地址
+  const streamUrl = await api.live.getStreamUrl('214844');
+  console.log('RTMP:', streamUrl.data.rtmpUrl);
+  console.log('密钥:', streamUrl.data.streamKey);
+
+  // 3. 配置OBS并开始推流
+  console.log('请配置OBS并开始推流...');
+
+  // 4. 检测推流状态
+  while (true) {
+    const status = await api.live.getLiveStreamStatus();
+    if (status.success && status.data) {
+      console.log('检测到推流！');
+      break;
+    }
+    await new Promise(r => setTimeout(r, 5000));
+  }
+
+  // 5. 正式开播
+  const liveResult = await api.live.startLiveStream(
+    '我的直播间',
+    'cover.jpg',
+    streamName,
+    false, false, 1, 101
+  );
+  
+  console.log('直播已开启:', liveResult.data.liveId);
+}
+```
+
+## 场景4：获取直播统计数据
+
+```typescript
+async function getLiveStats() {
+  const api = new AcFunLiveApi({
+    baseUrl: 'https://api.kuaishouzt.com'
+  });
+
+  api.setAuthToken(token);
+
+  // 获取热门直播
+  const hotLives = await api.live.getHotLives('', 0, 10);
+  
+  for (const live of hotLives.data.lives) {
+    // 获取每个直播的统计
+    const stats = await api.live.getLiveStatistics(live.liveId);
+    
+    console.log('直播间:', live.title);
+    console.log('观看人数:', stats.data.totalViewers);
+    console.log('弹幕数:', stats.data.totalComments);
+    console.log('礼物数:', stats.data.totalGifts);
+  }
+}
+```
+
+## 场景5：会话健康监控
+
+```typescript
+async function healthMonitoring() {
+  const api = new AcFunLiveApi({
+    baseUrl: 'https://api.kuaishouzt.com'
+  });
+
+  api.setAuthToken(token);
+
+  const result = await api.danmu.startDanmu(liverUID, callback);
+  const sessionId = result.data.sessionId;
+
+  // 定期检查健康状态
+  setInterval(async () => {
+    const health = await api.danmu.getSessionHealth(sessionId);
+    
+    if (!health.data.isHealthy) {
+      console.warn('会话不健康:', health.data.errorMessages);
+      
+      // 可以选择重启会话
+      await api.danmu.stopDanmu(sessionId);
+      await api.danmu.startDanmu(liverUID, callback);
+    }
+  }, 60000); // 每分钟检查
+}
+```
+
+更多示例请参阅 [API参考文档](./api-reference.md)。

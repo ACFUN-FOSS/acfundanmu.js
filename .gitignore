@@ -1,14 +1,27 @@
 # 依赖目录
 node_modules/
+jspm_packages/
 
 # 日志文件
 logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
 
 # 环境变量文件
 .env
+.env.test
+.env.local
+.env.production
 
 # 编译产物
 build/
+dist/
+
+# TypeScript 编译缓存
+*.tsbuildinfo
 
 # 临时文件
 *.tmp
@@ -17,11 +30,48 @@ build/
 # 编辑器配置
 .vscode/
 .idea/
+*.swp
+*.swo
 
 # 操作系统文件
 .DS_Store
 Thumbs.db
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 
 # npm 相关文件
 package-lock.json
-npm-debug.log*
+
+# 测试覆盖率
+coverage/
+*.lcov
+.nyc_output
+
+# ESLint 缓存
+.eslintcache
+
+# 运行时数据
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# 缓存目录
+.cache/
+.parcel-cache/
+
+# 服务器相关
+.serverless/
+
+# 测试相关敏感文件
+tests/token.json
+
+# 开发工具配置目录
+.trae/
+.qoder/
+
+# Go源码目录
+source/

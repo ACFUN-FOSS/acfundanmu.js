@@ -1,0 +1,9 @@
+export { AuthService } from './AuthService';
+export { BadgeService } from './BadgeService';
+export { DanmuService } from './DanmuService';
+export { GiftService } from './GiftService';
+export { LivePreviewService } from './LivePreviewService';
+export { LiveService } from './LiveService';
+export { ManagerService } from './ManagerService';
+export { ReplayService } from './ReplayService';
+export { UserService } from './UserService';
