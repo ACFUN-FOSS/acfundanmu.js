@@ -154,6 +154,26 @@ interface UserInfo {
 }
 ```
 
+### MedalInfo - 粉丝牌信息
+
+```typescript
+interface MedalInfo {
+  uperID: number;    // 主播ID
+  userID: number;    // 用户ID
+  clubName: string;  // 粉丝团名称
+  level: number;     // 等级
+}
+```
+
+### ManagerType - 房管类型枚举
+
+```typescript
+enum ManagerType {
+  NotManager = 0,      // 非房管
+  NormalManager = 1    // 普通房管
+}
+```
+
 ### UserProfile - 用户资料
 
 ```typescript
@@ -237,3 +257,101 @@ interface HealthCheckData {
 ```
 
 更多类型定义请参阅源码 `src/types/index.ts`。
+
+## 房管管理相关
+
+### Manager - 房管信息
+
+```typescript
+interface Manager {
+  userInfo: {
+    userID: number;
+    nickname: string;
+    avatar: string;
+    medal: {
+      uperID: number;
+      userID: number;
+      clubName: string;
+      level: number;
+    };
+    managerType: number;
+  };
+  customData: string;
+  online: boolean;
+}
+```
+
+### KickRecord - 踢人记录
+
+```typescript
+interface KickRecord {
+  userID: number;    // 被踢用户ID
+  nickname: string;  // 被踢用户昵称
+  kickTime: number;  // 踢人时间戳
+}
+```
+
+## 守护徽章相关
+
+### Badge - 守护徽章
+
+```typescript
+interface Badge {
+  uperID: number;    // 主播ID
+  userID: number;    // 用户ID
+  clubName: string;  // 粉丝团名称
+  level: number;     // 等级
+}
+```
+
+### BadgeDetail - 守护徽章详情
+
+```typescript
+interface BadgeDetail extends Badge {
+  experience: number;         // 当前经验值
+  nextLevelExperience: number; // 下一级所需经验值
+  joinTime: number;           // 加入时间戳
+}
+```
+
+### BadgeRank - 守护徽章排行
+
+```typescript
+interface BadgeRank {
+  userID: number;    // 用户ID
+  nickname: string;  // 昵称
+  avatar: string;    // 头像
+  level: number;     // 等级
+  experience: number; // 经验值
+  rank: number;      // 排名
+}
+```
+
+## 直播预告相关
+
+### LivePreview - 直播预告
+
+```typescript
+interface LivePreview {
+  userId: number;        // 主播用户ID
+  userName: string;      // 主播用户名
+  liveTitle: string;     // 直播标题
+  liveCover: string;     // 直播封面
+  scheduledTime: string; // 预定时间(ISO 8601格式)
+}
+```
+
+## 直播回放相关
+
+### LiveReplay - 直播回放
+
+```typescript
+interface LiveReplay {
+  duration: number;    // 回放时长(毫秒)
+  url: string;         // 回放播放地址
+  backupUrl?: string;  // 备份播放地址
+  m3u8Slice: string;   // M3U8切片信息
+  width: number;       // 视频宽度
+  height: number;      // 视频高度
+}
+```

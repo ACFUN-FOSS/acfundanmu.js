@@ -218,6 +218,86 @@ if (giftResult.success) {
 }
 ```
 
+## 📺 直播预告
+
+### 获取直播预告列表
+
+```typescript
+const previewResult = await api.livePreview.getLivePreviewList();
+
+if (previewResult.success) {
+  previewResult.data.previewList.forEach(preview => {
+    console.log('主播:', preview.userName);
+    console.log('标题:', preview.liveTitle);
+    console.log('预定时间:', preview.scheduledTime);
+  });
+}
+```
+
+## 👮 房管功能
+
+### 获取房管列表
+
+```typescript
+const managerResult = await api.manager.getManagerList();
+
+if (managerResult.success) {
+  managerResult.data.forEach(manager => {
+    console.log('房管:', manager.nickname);
+    console.log('在线状态:', manager.online ? '在线' : '离线');
+  });
+}
+```
+
+### 添加/删除房管
+
+```typescript
+// 添加房管
+const addResult = await api.manager.addManager(214844);
+if (addResult.success) {
+  console.log('房管添加成功');
+}
+
+// 删除房管
+const deleteResult = await api.manager.deleteManager(214844);
+if (deleteResult.success) {
+  console.log('房管删除成功');
+}
+```
+
+### 踢人功能
+
+```typescript
+const liveId = '123456';
+const kickedUserId = 789;
+
+// 房管踢人
+const managerKickResult = await api.manager.managerKick(liveId, kickedUserId);
+if (managerKickResult.success) {
+  console.log('房管踢人成功');
+}
+
+// 主播踢人
+const authorKickResult = await api.manager.authorKick(liveId, kickedUserId);
+if (authorKickResult.success) {
+  console.log('主播踢人成功');
+}
+```
+
+## 🎬 直播回放
+
+### 获取直播回放信息
+
+```typescript
+const replayResult = await api.replay.getLiveReplay('liveId123');
+
+if (replayResult.success) {
+  console.log('回放时长:', replayResult.data.duration);
+  console.log('回放地址:', replayResult.data.url);
+  console.log('分辨率:', `${replayResult.data.width}x${replayResult.data.height}`);
+}
+```
+
 ## 🔄 完整示例
 
 以下是一个完整的弹幕监控示例：

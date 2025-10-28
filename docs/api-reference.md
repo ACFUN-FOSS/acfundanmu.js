@@ -12,7 +12,39 @@ interface ApiResponse<T> {
   data?: T;           // 成功时返回的数据
   error?: string;     // 失败时的错误消息
   code?: number;      // 错误码(可选)
+  headers?: Record<string, any>; // 响应头信息(可选)
 }
+```
+
+## API 配置
+
+### ApiConfig 配置选项
+
+```typescript
+interface ApiConfig {
+  baseUrl?: string;           // API基础URL，默认: 'https://api.kuaishouzt.com'
+  timeout?: number;           // 请求超时时间(毫秒)，默认: 10000
+  retryCount?: number;        // 重试次数，默认: 3
+  headers?: Record<string, string>; // 自定义请求头
+}
+```
+
+### 创建API实例
+
+```typescript
+import { AcFunLiveApi } from 'acfunlive-http-api';
+
+// 使用默认配置
+const api = new AcFunLiveApi();
+
+// 使用自定义配置
+const api = new AcFunLiveApi({
+  timeout: 15000,
+  retryCount: 5,
+  headers: {
+    'User-Agent': 'MyApp/1.0.0'
+  }
+});
 ```
 
 ## 认证 API
@@ -184,5 +216,85 @@ StreamUrl {
 ### getAllGiftList - 获取礼物列表
 
 **响应：** `GiftInfo[]`
+
+## 直播预告 API
+
+### getLivePreviewList - 获取直播预告列表
+
+获取即将开始的直播预告信息。
+
+**响应：**
+```typescript
+{
+  previewList: Array<{
+    userId: number;
+    userName: string;
+    liveTitle: string;
+    liveCover: string;
+    scheduledTime: string; // ISO 8601 格式
+  }>;
+}
+```
+
+## 房管 API
+
+### getManagerList - 获取房管列表
+
+获取当前用户的房管列表。
+
+**响应：**
+```typescript
+Array<{
+  userId: string;
+  nickname: string;
+  avatar: string;
+  customData: string;
+  online: boolean;
+}>
+```
+
+### addManager - 添加房管
+
+**参数：** `managerUID: number`
+
+### deleteManager - 删除房管
+
+**参数：** `managerUID: number`
+
+### getAuthorKickRecords - 获取踢人记录
+
+**参数：** `liveID: string`
+
+**响应：** `KickRecord[]`
+
+### managerKick - 房管踢人
+
+**参数：**
+- `liveID: string` - 直播间ID
+- `kickedUID: number` - 被踢用户ID
+
+### authorKick - 主播踢人
+
+**参数：**
+- `liveID: string` - 直播间ID
+- `kickedUID: number` - 被踢用户ID
+
+## 直播回放 API
+
+### getLiveReplay - 获取直播回放
+
+**参数：** `liveId: string`
+
+**响应：**
+```typescript
+{
+  duration: number;
+  url: string;
+  backupUrl?: string;
+  m3u8Slice: string;
+  width: number;
+  height: number;
+}
+```
 
 详细数据结构请参阅 [数据模型文档](./data-models.md)。

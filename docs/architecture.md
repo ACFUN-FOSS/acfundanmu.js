@@ -26,6 +26,9 @@ AcFun 直播 HTTP API 是一个将复杂的 WebSocket 弹幕协议转换为简�
 - `UserService`: 用户服务
 - `GiftService`: 礼物服务
 - `ManagerService`: 房管服务
+- `LivePreviewService`: 直播预告服务
+- `ReplayService`: 直播回放服务
+- `BadgeService`: 守护徽章服务
 
 ## 技术架构
 
@@ -103,6 +106,21 @@ Protobuf 工具：
 检查权限 -> 获取推流地址 -> 配置OBS -> 推流 -> 检测推流 -> 开播
 ```
 
+### 房管管理流程
+```
+获取房管列表 -> 添加/删除房管 -> 房管踢人 -> 主播踢人 -> 查看踢人记录
+```
+
+### 直播预告流程
+```
+获取预告列表 -> 查看预告详情 -> 设置提醒
+```
+
+### 直播回放流程
+```
+获取回放信息 -> 获取播放地址 -> 播放回放
+```
+
 ## 设计模式
 
 ### 工厂模式
@@ -165,6 +183,11 @@ Protobuf 工具：
 1. 创建 Service 类
 2. 在 AcFunLiveApi 中注册
 3. 导出类型定义
+
+新增的服务示例：
+- `LivePreviewService`: 提供直播预告功能
+- `ReplayService`: 提供直播回放功能  
+- `BadgeService`: 提供守护徽章管理功能
 
 ### 事件扩展
 添加新的弹幕事件类型:

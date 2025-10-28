@@ -160,4 +160,123 @@ async function healthMonitoring() {
 }
 ```
 
+## 场景6：房管功能管理
+
+```typescript
+async function manageRoom() {
+  const api = new AcFunLiveApi({
+    baseUrl: 'https://api.kuaishouzt.com'
+  });
+
+  api.setAuthToken(token);
+
+  // 获取当前房管列表
+  const managers = await api.manager.getManagerList();
+  console.log('当前房管数量:', managers.data.length);
+
+  // 添加新房管
+  const addResult = await api.manager.addManager(214844);
+  if (addResult.success) {
+    console.log('房管添加成功');
+  }
+
+  // 在直播间踢人
+  const liveId = '123456';
+  const kickResult = await api.manager.managerKick(liveId, 789012);
+  if (kickResult.success) {
+    console.log('踢人成功');
+  }
+
+  // 查看踢人记录
+  const records = await api.manager.getAuthorKickRecords(liveId);
+  console.log('踢人记录数:', records.data.length);
+}
+```
+
+## 场景7：直播预告和回放
+
+```typescript
+async function previewAndReplay() {
+  const api = new AcFunLiveApi({
+    baseUrl: 'https://api.kuaishouzt.com'
+  });
+
+  api.setAuthToken(token);
+
+  // 获取直播预告
+  const previews = await api.livePreview.getLivePreviewList();
+  console.log('即将开播的直播:');
+  previews.data.previewList.forEach(preview => {
+    console.log(`${preview.userName}: ${preview.liveTitle}`);
+    console.log(`预定时间: ${preview.scheduledTime}`);
+  });
+
+  // 获取直播回放
+  const replayResult = await api.replay.getLiveReplay('liveId123');
+  if (replayResult.success) {
+    console.log('回放信息:');
+    console.log('时长:', replayResult.data.duration);
+    console.log('播放地址:', replayResult.data.url);
+    console.log('分辨率:', `${replayResult.data.width}x${replayResult.data.height}`);
+  }
+}
+```
+
+## 场景8：综合监控面板
+
+```typescript
+async function monitoringDashboard() {
+  const api = new AcFunLiveApi({
+    baseUrl: 'https://api.kuaishouzt.com'
+  });
+
+  api.setAuthToken(token);
+
+  // 启动多个直播间监控
+  const liverUIDs = ['123456', '789012'];
+  const sessions = [];
+
+  for (const uid of liverUIDs) {
+    const result = await api.danmu.startDanmu(uid, (event) => {
+      // 处理弹幕事件
+      if ('content' in event) {
+        console.log(`[${uid}] ${event.danmuInfo.userInfo.nickname}: ${event.content}`);
+      }
+    });
+    sessions.push({ uid, sessionId: result.data.sessionId });
+  }
+
+  // 定期输出监控报告
+  setInterval(async () => {
+    console.log('\n=== 监控报告 ===');
+    
+    // 全局统计
+    const globalStats = await api.danmu.getSessionStatistics();
+    console.log('活跃会话:', globalStats.data.activeSessions);
+    console.log('总消息数:', globalStats.data.totalMessages);
+
+    // 各会话详情
+    for (const session of sessions) {
+      const detail = await api.danmu.getSessionDetail(session.sessionId);
+      if (detail.success) {
+        console.log(`会话 ${session.uid}:`, detail.data.state);
+        console.log(`消息数: ${detail.data.messageCount}`);
+      }
+    }
+
+    // 健康检查
+    const healthResults = await Promise.all(
+      sessions.map(s => api.danmu.getSessionHealth(s.sessionId))
+    );
+    
+    const unhealthySessions = healthResults.filter(h => !h.data.isHealthy);
+    if (unhealthySessions.length > 0) {
+      console.warn('不健康会话数:', unhealthySessions.length);
+    }
+
+    console.log('==================\n');
+  }, 30000); // 每30秒输出一次报告
+}
+```
+
 更多示例请参阅 [API参考文档](./api-reference.md)。
