@@ -14,6 +14,7 @@ export class HttpClient {
   constructor(config?: ApiConfig) {
     this.config = config || {};
     this.client = axios.create({
+      baseURL: this.config.baseUrl,
       timeout: this.config.timeout || 10000,
       headers: this.config.headers || {},
     });
@@ -62,7 +63,7 @@ export class HttpClient {
     if (url.startsWith('http://') || url.startsWith('https://')) {
       return url;
     }
-    return url;
+    return `${this.config.baseUrl || ''}${url}`;
   }
 
   public async get<T = any>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {

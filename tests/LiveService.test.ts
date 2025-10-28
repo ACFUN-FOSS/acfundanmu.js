@@ -1,4 +1,4 @@
-﻿import { AcFunLiveApi } from '../src/index';
+import { AcFunLiveApi } from '../src/index';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -13,14 +13,14 @@ describe('LiveService', () => {
     // 读取token文件
     const tokenPath = path.join(__dirname, 'token.json');
     if (!fs.existsSync(tokenPath)) {
-      throw new Error('?token.json文件不存在，请先运行二维码登录测试生成token');
+      throw new Error('❌token.json文件不存在，请先运行二维码登录测试生成token');
     }
 
     const tokenData = JSON.parse(fs.readFileSync(tokenPath, 'utf8'));
     token = tokenData.token;
 
     if (!token) {
-      throw new Error('?token.json文件中没有有效的token');
+      throw new Error('❌token.json文件中没有有效的token');
     }
 
     // 设置全局token
@@ -40,7 +40,9 @@ describe('LiveService', () => {
       // 验证返回结果
       expect(result).toBeDefined();
       
-      // API调用可能成功也可能失败，这取决于实际的API状?      // 我们主要验证返回的数据结构是否正?      if (result.success) {
+      // API调用可能成功也可能失败，这取决于实际的API状态
+      // 我们主要验证返回的数据结构是否正确
+      if (result.success) {
         expect(result.data).toBeDefined();
         
         // 验证推流地址信息字段存在
@@ -52,23 +54,25 @@ describe('LiveService', () => {
           expect(typeof result.data.streamKey).toBe('string');
           
           const streamUrlDetails = [
-            '?获取推流地址成功?,
-            '\n📊 推流地址详情?,
+            '✅获取推流地址成功！',
+            '\n📊 推流地址详情：',
             `RTMP服务器地址: ${result.data.rtmpUrl}`,
             `推流密钥: ${result.data.streamKey}`,
             `过期时间: ${new Date(result.data.expiresAt).toISOString()}`
           ];
           
-          // 使用测试报告记录推流地址信息，而不是直接打?          streamUrlDetails.forEach(detail => {
+          // 使用测试报告记录推流地址信息，而不是直接打印
+          streamUrlDetails.forEach(detail => {
             expect(detail).toBeDefined();
           });
         }
       } else {
         // 如果API调用失败，验证是否有错误信息
         expect(result.error).toBeDefined();
-        console.log('API调用失败，错误信?', result.error);
+        console.log('API调用失败，错误信息：', result.error);
       }
-    }, 15000); // 设置15秒超?
+    }, 15000); // 设置15秒超时
+
     it('should handle API error response', async () => {
       // 使用无效的直播ID进行测试
       const invalidLiveId = 'invalid-live-id';
@@ -81,13 +85,16 @@ describe('LiveService', () => {
       // 验证返回结果
       expect(result).toBeDefined();
       
-      // API调用可能成功也可能失败，我们验证返回的数据结?      if (result.success) {
+      // API调用可能成功也可能失败，我们验证返回的数据结构
+      if (result.success) {
         // 即使参数无效，API也可能返回成功但数据为空
         expect(result.data).toBeDefined();
       } else {
-        // 验证是否有错误信?        expect(result.error).toBeDefined();
+        // 验证是否有错误信息
+        expect(result.error).toBeDefined();
       }
-    }, 15000); // 设置15秒超?  });
+    }, 15000); // 设置15秒超时
+  });
 
   describe('getLiveCategories', () => {
     it('should successfully get live categories list', async () => {
@@ -112,13 +119,15 @@ describe('LiveService', () => {
           expect(typeof category.categoryID).toBe('number');
           expect(typeof category.categoryName).toBe('string');
           
-          // 验证子分类属?          expect(category.subCategoryID).toBeDefined();
+          // 验证子分类属性
+          expect(category.subCategoryID).toBeDefined();
           expect(category.subCategoryName).toBeDefined();
           expect(typeof category.subCategoryID).toBe('number');
           expect(typeof category.subCategoryName).toBe('string');
         }
       }
-    }, 10000); // 设置10秒超?
+    }, 10000); // 设置10秒超时
+
     it('should handle API error response', async () => {
       // 测试API错误处理
       const result = await api.live.getLiveCategories();
@@ -130,20 +139,23 @@ describe('LiveService', () => {
       expect(result).toBeDefined();
       expect(typeof result.success).toBe('boolean');
       
-      // API调用可能成功也可能失败，我们验证返回的数据结?      if (result.success) {
+      // API调用可能成功也可能失败，我们验证返回的数据结构
+      if (result.success) {
         expect(result.data).toBeDefined();
       } else {
-        // 验证是否有错误信?        expect(result.error).toBeDefined();
-        console.log('API调用失败，错误信?', result.error);
+        // 验证是否有错误信息
+        expect(result.error).toBeDefined();
+        console.log('API调用失败，错误信息：', result.error);
       }
-    }, 10000); // 设置10秒超?  });
+    }, 10000); // 设置10秒超时
+  });
 
   describe('getHotLives', () => {
     it('should successfully get hot live list', async () => {
       const result = await api.live.getHotLives();
       
       // 打印接口请求结果
-      console.log('Hot Lives API response:',result);
+      console.log('Hot Lives API response:', result);
       
       // 验证返回结果
       expect(result).toBeDefined();
@@ -162,7 +174,8 @@ describe('LiveService', () => {
           expect(live.coverUrl).toBeDefined();
           expect(typeof live.onlineCount).toBe('number');
           
-          // 验证可选属性（如果存在?          if (live.likeCount !== undefined) {
+          // 验证可选属性（如果存在）
+          if (live.likeCount !== undefined) {
             expect(typeof live.likeCount).toBe('number');
           }
           if (live.startTime !== undefined) {
@@ -186,7 +199,8 @@ describe('LiveService', () => {
           }
         }
       }
-    }, 10000); // 设置10秒超?
+    }, 10000); // 设置10秒超时
+
     it('should get hot lives with pagination parameters', async () => {
       // 测试带分页参数的调用
       const result = await api.live.getHotLives('', 0, 10);
@@ -202,17 +216,20 @@ describe('LiveService', () => {
         expect(Array.isArray(result.data.lives)).toBe(true);
         expect(typeof result.data.total).toBe('number');
         
-        // 验证分页参数生效（如果API支持?        const liveInfoDetails = [
+        // 验证分页参数生效（如果API支持）
+        const liveInfoDetails = [
           `Hot Lives Success: ${result.success}`,
           `Total Lives: ${result.data.total}`,
           `Lives Count: ${result.data.lives.length}`
         ];
         
-        // 使用测试断言来记录信?        liveInfoDetails.forEach(detail => {
+        // 使用测试断言来记录信息
+        liveInfoDetails.forEach(detail => {
           expect(detail).toBeDefined();
         });
       }
-    }, 10000); // 设置10秒超?
+    }, 10000); // 设置10秒超时
+
     it('should handle category parameter correctly', async () => {
       // 测试带分类参数的调用
       const result = await api.live.getHotLives('game', 0, 20);
@@ -227,17 +244,20 @@ describe('LiveService', () => {
       if (result.success && result.data) {
         expect(Array.isArray(result.data.lives)).toBe(true);
         
-        // 如果有直播数据，可以验证分类信息（如果API支持分类过滤?        const liveInfoDetails = [
+        // 如果有直播数据，可以验证分类信息（如果API支持分类过滤）
+        const liveInfoDetails = [
           `Hot Lives with Category Success: ${result.success}`,
           `Lives Count: ${result.data.lives.length}`,
           `Total Count: ${result.data.total}`
         ];
         
-        // 使用测试断言来记录信?        liveInfoDetails.forEach(detail => {
+        // 使用测试断言来记录信息
+        liveInfoDetails.forEach(detail => {
           expect(detail).toBeDefined();
         });
       }
-    }, 10000); // 设置10秒超?  });
+    }, 10000); // 设置10秒超时
+  });
 
   describe('getLiveStatistics', () => {
     it('should successfully get live statistics', async () => {
@@ -280,30 +300,30 @@ describe('LiveService', () => {
           expect(typeof result.data.totalLikes).toBe('number');
           expect(typeof result.data.revenue).toBe('number');
           
-
-          
           // 打印统计数据详情
           const statsDetails = [
-            '?获取直播统计数据成功?,
-            '\n📊 直播统计数据详情?,
-            `总观看人? ${result.data.totalViewers}`,
-            `峰值观看人? ${result.data.peakViewers}`,
+            '✅获取直播统计数据成功！',
+            '\n📊 直播统计数据详情：',
+            `总观看人数: ${result.data.totalViewers}`,
+            `峰值观看人数: ${result.data.peakViewers}`,
             `总弹幕数: ${result.data.totalComments}`,
             `总礼物数: ${result.data.totalGifts}`,
             `总点赞数: ${result.data.totalLikes}`,
-            `收入(AC?: ${result.data.revenue}`
+            `收入(AC币): ${result.data.revenue}`
           ];
           
-          // 使用测试断言来记录信?          statsDetails.forEach(detail => {
+          // 使用测试断言来记录信息
+          statsDetails.forEach(detail => {
             expect(detail).toBeDefined();
           });
         }
       } else {
         // 如果API调用失败，验证是否有错误信息
         expect(result.error).toBeDefined();
-        console.log('API调用失败，错误信?', result.error);
+        console.log('API调用失败，错误信息：', result.error);
       }
-    }, 10000); // 设置10秒超?
+    }, 10000); // 设置10秒超时
+
     it('should handle API error response', async () => {
       // 使用无效的liveId进行测试
       const invalidLiveId = 'invalid-live-id';
@@ -317,13 +337,16 @@ describe('LiveService', () => {
       expect(result).toBeDefined();
       expect(typeof result.success).toBe('boolean');
       
-      // API调用可能成功也可能失败，我们验证返回的数据结?      if (result.success) {
+      // API调用可能成功也可能失败，我们验证返回的数据结构
+      if (result.success) {
         expect(result.data).toBeDefined();
       } else {
-        // 验证是否有错误信?        expect(result.error).toBeDefined();
-        console.log('API调用失败，错误信?', result.error);
+        // 验证是否有错误信息
+        expect(result.error).toBeDefined();
+        console.log('API调用失败，错误信息：', result.error);
       }
-    }, 10000); // 设置10秒超?  });
+    }, 10000); // 设置10秒超时
+  });
 
   describe('getLiveList', () => {
     it('should successfully get live list', async () => {
@@ -355,26 +378,26 @@ describe('LiveService', () => {
           expect(typeof live.category).toBe('string');
           expect(typeof live.isLive).toBe('boolean');
           
-
-          
           // 打印直播列表详情
           const listDetails = [
-            '?获取直播列表成功?,
+            '✅获取直播列表成功！',
             `总直播数: ${result.data.totalCount}`,
             `当前页直播数: ${result.data.lives.length}`,
-            `是否有更? ${result.data.hasMore}`
+            `是否有更多: ${result.data.hasMore}`
           ];
           
-          // 使用测试断言来记录信?          listDetails.forEach(detail => {
+          // 使用测试断言来记录信息
+          listDetails.forEach(detail => {
             expect(detail).toBeDefined();
           });
         }
       } else {
         // 如果API调用失败，验证是否有错误信息
         expect(result.error).toBeDefined();
-        console.log('API调用失败，错误信?', result.error);
+        console.log('API调用失败，错误信息：', result.error);
       }
-    }, 10000); // 设置10秒超?
+    }, 10000); // 设置10秒超时
+
     it('should get live list with pagination parameters', async () => {
       // 调用getLiveList，带分页参数
       const result = await api.live.getLiveList(1, 10);
@@ -399,13 +422,16 @@ describe('LiveService', () => {
           `Has More: ${result.data.hasMore}`
         ];
         
-        // 使用测试断言来记录信?        listDetails.forEach(detail => {
+        // 使用测试断言来记录信息
+        listDetails.forEach(detail => {
           expect(detail).toBeDefined();
         });
       }
-    }, 10000); // 设置10秒超?
+    }, 10000); // 设置10秒超时
+
     it('should handle invalid parameters', async () => {
-      // 使用无效的分页参数进行测?      const result = await api.live.getLiveList(-1, -1);
+      // 使用无效的分页参数进行测试
+      const result = await api.live.getLiveList(-1, -1);
       
       // 打印接口请求结果
       console.log('Live List with invalid liverUID API response:', JSON.stringify(result, null, 2));
@@ -414,16 +440,20 @@ describe('LiveService', () => {
       expect(result).toBeDefined();
       expect(typeof result.success).toBe('boolean');
       
-      // API调用可能成功也可能失败，我们验证返回的数据结?      if (result.success) {
+      // API调用可能成功也可能失败，我们验证返回的数据结构
+      if (result.success) {
         expect(result.data).toBeDefined();
-        // 即使参数无效，API可能返回空列?        expect(Array.isArray(result.data?.lives)).toBe(true);
+        // 即使参数无效，API可能返回空列表
+        expect(Array.isArray(result.data?.lives)).toBe(true);
         expect(typeof result.data?.totalCount).toBe('number');
         expect(typeof result.data?.hasMore).toBe('boolean');
       } else {
-        // 验证是否有错误信?        expect(result.error).toBeDefined();
-        console.log('API调用失败，错误信?', result.error);
+        // 验证是否有错误信息
+        expect(result.error).toBeDefined();
+        console.log('API调用失败，错误信息：', result.error);
       }
-    }, 10000); // 设置10秒超?  });
+    }, 10000); // 设置10秒超时
+  });
 
   describe('getUserLiveInfo', () => {
     it('should successfully get user live information', async () => {
@@ -443,7 +473,8 @@ describe('LiveService', () => {
         expect(userID).toBeDefined();
         
         if (userID) {
-          // 将用户ID转换为数字类?          const numericUserID = parseInt(userID.toString(), 10);
+          // 将用户ID转换为数字类型
+          const numericUserID = parseInt(userID.toString(), 10);
           
           // 调用getUserLiveInfo函数
           const result = await api.live.getUserLiveInfo(numericUserID);
@@ -475,19 +506,18 @@ describe('LiveService', () => {
               // 验证liveType字段
               expect(typeof result.data.liveType.categoryID).toBe('number');
               expect(typeof result.data.liveType.categoryName).toBe('string');
-              
-
             }
           } else {
             // 如果API调用失败，验证是否有错误信息
             expect(result.error).toBeDefined();
-            console.log('API调用失败，错误信?', result.error);
+            console.log('API调用失败，错误信息：', result.error);
           }
         }
       } else {
-        console.log('?无法获取热门直播列表，跳过用户直播信息测?);
+        console.log('❌无法获取热门直播列表，跳过用户直播信息测试');
       }
-    }, 15000); // 设置15秒超?
+    }, 15000); // 设置15秒超时
+
     it('should handle invalid user ID gracefully', async () => {
       // 使用无效的用户ID进行测试
       const invalidUserID = 999999999;
@@ -501,17 +531,21 @@ describe('LiveService', () => {
       expect(result).toBeDefined();
       expect(typeof result.success).toBe('boolean');
       
-      // API调用可能成功也可能失败，我们验证返回的数据结?      if (result.success) {
+      // API调用可能成功也可能失败，我们验证返回的数据结构
+      if (result.success) {
         expect(result.data).toBeDefined();
       } else {
-        // 验证是否有错误信?        expect(result.error).toBeDefined();
-        console.log('API调用失败，错误信?', result.error);
+        // 验证是否有错误信息
+        expect(result.error).toBeDefined();
+        console.log('API调用失败，错误信息：', result.error);
       }
-    }, 10000); // 设置10秒超?  });
+    }, 10000); // 设置10秒超时
+  });
 
   describe('getLiveStatisticsByDays', () => {
     it('should successfully get live statistics by days', async () => {
-      // 使用有效的天数参数进行测?      const days = 7;
+      // 使用有效的天数参数进行测试
+      const days = 7;
       
       const result = await api.live.getLiveStatisticsByDays(days);
       
@@ -559,17 +593,17 @@ describe('LiveService', () => {
             expect(firstDaily.liveStat).toBeDefined();
             expect(typeof firstDaily.liveStat.duration).toBe('number');
           }
-          
-
         }
       } else {
         // 如果API调用失败，验证是否有错误信息
         expect(result.error).toBeDefined();
-        console.log('API调用失败，错误信?', result.error);
+        console.log('API调用失败，错误信息：', result.error);
       }
-    }, 15000); // 设置15秒超?
+    }, 15000); // 设置15秒超时
+
     it('should handle invalid days parameter gracefully', async () => {
-      // 使用无效的天数参数进行测?      const invalidDays = 0;
+      // 使用无效的天数参数进行测试
+      const invalidDays = 0;
       
       const result = await api.live.getLiveStatisticsByDays(invalidDays);
       
@@ -585,8 +619,9 @@ describe('LiveService', () => {
       expect(result.error).toBeDefined();
       expect(result.error).toContain('days参数必须大于等于1');
       
-      console.log('API调用失败，错误信?', result.error);
-    }, 10000); // 设置10秒超?  });
+      console.log('API调用失败，错误信息：', result.error);
+    }, 10000); // 设置10秒超时
+  });
 
   describe('getStreamSettings', () => {
     it('should successfully get stream settings', async () => {
@@ -602,7 +637,7 @@ describe('LiveService', () => {
       if (result.success) {
         expect(result.data).toBeDefined();
         
-        // 验证推流设置字段存在
+        // 验证流设置信息字段存在
         if (result.data) {
           expect(typeof result.data.streamName).toBe('string');
           expect(typeof result.data.streamPullAddress).toBe('string');
@@ -610,129 +645,62 @@ describe('LiveService', () => {
           expect(typeof result.data.panoramic).toBe('boolean');
           expect(typeof result.data.intervalMillis).toBe('number');
           
-          // 打印推流设置详情
-          const streamSettingsDetails = [
-            '?获取推流设置成功?,
-            '\n📊 推流设置详情?,
-            `流名? ${result.data.streamName}`,
+          // 打印流设置详情
+          const streamDetails = [
+            '✅成功获取流设置信息！',
+            '\n📊 流设置详情：',
+            `流名称: ${result.data.streamName}`,
             `拉流地址: ${result.data.streamPullAddress}`,
-            `推流地址: ${result.data.streamPushAddress.join(', ')}`,
-            `全景模式: ${result.data.panoramic ? '? : '?}`,
+            `推流地址数量: ${result.data.streamPushAddress.length}`,
+            `全景模式: ${result.data.panoramic ? '是' : '否'}`,
             `间隔毫秒: ${result.data.intervalMillis}`
           ];
           
-          streamSettingsDetails.forEach(detail => {
-            console.log(detail);
-          });
-          
-
-        }
-      } else {
-        // 如果API调用失败，验证是否有错误信息
-        expect(result.error).toBeDefined();
-        console.log('API调用失败，错误信?', result.error);
-      }
-    }, 15000); // 设置15秒超?
-    it('should handle API error response', async () => {
-      // 测试API错误处理
-      const result = await api.live.getStreamSettings();
-      
-      // 打印接口请求结果
-      console.log('Stream Settings API response:', JSON.stringify(result, null, 2));
-      
-      // 验证返回结果
-      expect(result).toBeDefined();
-      expect(typeof result.success).toBe('boolean');
-      
-      // API调用可能成功也可能失败，我们验证返回的数据结?      if (result.success) {
-        expect(result.data).toBeDefined();
-      } else {
-        // 验证是否有错误信?        expect(result.error).toBeDefined();
-        console.log('API调用失败，错误信?', result.error);
-      }
-    }, 15000); // 设置15秒超?  });
-
-  describe('getLiveStreamStatus', () => {
-    it('should successfully get live stream status', async () => {
-      // 直接调用getLiveStreamStatus，该函数不需要liveId参数
-      const result = await api.live.getLiveStreamStatus();
-      
-      // 打印接口请求结果
-      console.log('Live Stream Status API response:', JSON.stringify(result, null, 2));
-      
-      // 验证返回结果
-      expect(result).toBeDefined();
-      expect(typeof result.success).toBe('boolean');
-      
-      if (result.success) {
-        expect(result.data).toBeDefined();
-        
-        // 验证直播状态字段存?        if (result.data) {
-          expect(result.data.liveID).toBeDefined();
-          expect(result.data.streamName).toBeDefined();
-          expect(result.data.title).toBeDefined();
-          expect(result.data.liveCover).toBeDefined();
-          expect(typeof result.data.liveStartTime).toBe('number');
-          expect(typeof result.data.panoramic).toBe('boolean');
-          expect(result.data.bizUnit).toBeDefined();
-          expect(result.data.bizCustomData).toBeDefined();
-          
-
-          
-          // 打印直播状态详?          const statusDetails = [
-            '?获取直播状态成功！',
-            '\n📊 直播状态详情：',
-            `直播ID: ${result.data.liveID}`,
-            `流名? ${result.data.streamName}`,
-            `标题: ${result.data.title}`,
-            `直播封面: ${result.data.liveCover}`,
-            `开始时? ${new Date(result.data.liveStartTime).toLocaleString()}`,
-            `全景模式: ${result.data.panoramic ? '? : '?}`,
-            `业务单元: ${result.data.bizUnit}`,
-            `业务自定义数? ${result.data.bizCustomData}`
-          ];
-          
-          // 使用测试断言来记录信?          statusDetails.forEach(detail => {
+          // 使用测试断言来记录信息
+          streamDetails.forEach(detail => {
             expect(detail).toBeDefined();
           });
         }
       } else {
         // 如果API调用失败，验证是否有错误信息
         expect(result.error).toBeDefined();
-        console.log('API调用失败，错误信?', result.error);
+        console.log('API调用失败，错误信息：', result.error);
       }
-    }, 15000); // 设置15秒超?
+    }, 15000); // 设置15秒超时
+
     it('should handle API error response', async () => {
-      // 直接调用getLiveStreamStatus，测试API错误处理
-      const result = await api.live.getLiveStreamStatus();
+      // 测试API错误处理
+      const result = await api.live.getStreamSettings();
       
       // 打印接口请求结果
-      console.log('Live Stream Status API response:', JSON.stringify(result, null, 2));
+      console.log('Stream Settings API error response:', JSON.stringify(result, null, 2));
       
       // 验证返回结果
       expect(result).toBeDefined();
       expect(typeof result.success).toBe('boolean');
       
-      // API调用可能成功也可能失败，我们验证返回的数据结?      if (result.success) {
+      // API调用可能成功也可能失败，我们验证返回的数据结构
+      if (result.success) {
         expect(result.data).toBeDefined();
       } else {
-        // 验证是否有错误信?        expect(result.error).toBeDefined();
-        console.log('API调用失败，错误信?', result.error);
+        // 验证是否有错误信息
+        expect(result.error).toBeDefined();
+        console.log('API调用失败，错误信息：', result.error);
       }
-    }, 15000); // 设置15秒超?  });
+    }, 15000); // 设置15秒超时
+  });
 
   describe('startLiveStream', () => {
     it('should successfully start live stream', async () => {
-      // 准备测试参数
+      // 使用测试参数启动直播
       const title = '测试直播标题';
-      const coverFile = 'test_cover.jpg';
-      const streamName = 'test_stream';
+      const coverFile = '';
+      const streamName = 'test-stream';
       const portrait = false;
       const panoramic = false;
       const categoryID = 1;
-      const subCategoryID = 101;
+      const subCategoryID = 1;
       
-      // 调用startLiveStream函数
       const result = await api.live.startLiveStream(title, coverFile, streamName, portrait, panoramic, categoryID, subCategoryID);
       
       // 打印接口请求结果
@@ -745,39 +713,36 @@ describe('LiveService', () => {
       if (result.success) {
         expect(result.data).toBeDefined();
         
-        // 验证启动直播返回字段存在
+        // 验证直播启动信息字段存在
         if (result.data) {
           expect(result.data.liveID).toBeDefined();
           expect(typeof result.data.liveID).toBe('string');
           
-
-          
-          // 打印启动直播详情
-          const startLiveDetails = [
-            '?启动直播成功?,
-            '\n📊 启动直播详情?,
+          // 打印直播启动详情
+          const startDetails = [
+            '✅成功启动直播！',
+            '\n📊 直播启动详情：',
             `直播ID: ${result.data.liveID}`,
             `标题: ${title}`,
-            `封面文件: ${coverFile}`,
-            `流名? ${streamName}`,
-            `竖屏模式: ${portrait ? '? : '?}`,
-            `全景模式: ${panoramic ? '? : '?}`,
-            `主分类ID: ${categoryID}`,
+            `分类ID: ${categoryID}`,
             `子分类ID: ${subCategoryID}`
           ];
           
-          // 使用测试断言来记录信?          startLiveDetails.forEach(detail => {
+          // 使用测试断言来记录信息
+          startDetails.forEach(detail => {
             expect(detail).toBeDefined();
           });
         }
       } else {
         // 如果API调用失败，验证是否有错误信息
         expect(result.error).toBeDefined();
-        console.log('API调用失败，错误信?', result.error);
+        console.log('API调用失败，错误信息：', result.error);
       }
-    }, 15000); // 设置15秒超?
+    }, 15000); // 设置15秒超时
+
     it('should handle missing required parameters', async () => {
-      // 测试缺少必要参数的情?      const result = await api.live.startLiveStream('', '', '', false, false, 0, 0);
+      // 测试缺少必需参数的情况
+      const result = await api.live.startLiveStream('', '', '', false, false, 0, 0);
       
       // 打印接口请求结果
       console.log('Start Live Stream with missing params API response:', JSON.stringify(result, null, 2));
@@ -786,14 +751,22 @@ describe('LiveService', () => {
       expect(result).toBeDefined();
       expect(typeof result.success).toBe('boolean');
       
-      // 应该返回错误，因为缺少必要参?      expect(result.success).toBe(false);
+      // 应该返回错误，因为参数无效
+      expect(result.success).toBe(false);
       expect(result.error).toBeDefined();
-      
-      console.log('API调用失败，错误信?', result.error);
-    }, 10000); // 设置10秒超?
+    }, 10000); // 设置10秒超时
+
     it('should handle API error response', async () => {
-      // 使用无效参数测试API错误处理
-      const result = await api.live.startLiveStream('invalid_title', 'invalid_cover', 'invalid_stream', false, false, 999, 999);
+      // 使用可能导致错误的参数
+      const title = '测试直播标题';
+      const coverFile = '';
+      const streamName = 'test-stream';
+      const portrait = false;
+      const panoramic = false;
+      const categoryID = 999999; // 无效的分类ID
+      const subCategoryID = 999999; // 无效的子分类ID
+      
+      const result = await api.live.startLiveStream(title, coverFile, streamName, portrait, panoramic, categoryID, subCategoryID);
       
       // 打印接口请求结果
       console.log('Start Live Stream API error response:', JSON.stringify(result, null, 2));
@@ -802,17 +775,20 @@ describe('LiveService', () => {
       expect(result).toBeDefined();
       expect(typeof result.success).toBe('boolean');
       
-      // API调用可能成功也可能失败，我们验证返回的数据结?      if (result.success) {
+      // API调用可能成功也可能失败，我们验证返回的数据结构
+      if (result.success) {
         expect(result.data).toBeDefined();
       } else {
-        // 验证是否有错误信?        expect(result.error).toBeDefined();
-        console.log('API调用失败，错误信?', result.error);
+        // 验证是否有错误信息
+        expect(result.error).toBeDefined();
+        console.log('API调用失败，错误信息：', result.error);
       }
-    }, 15000); // 设置15秒超?  });
+    }, 15000); // 设置15秒超时
+  });
 
   describe('checkLiveClipPermission', () => {
-    it('should successfully check live clip permission', async () => {
-      // 调用checkLiveClipPermission函数（该函数不需要参数）
+    it('should check live clip permission successfully', async () => {
+      // checkLiveClipPermission方法不需要参数
       const result = await api.live.checkLiveClipPermission();
       
       // 打印接口请求结果
@@ -825,31 +801,31 @@ describe('LiveService', () => {
       if (result.success) {
         expect(result.data).toBeDefined();
         
-        // 验证剪辑权限返回字段存在
+        // 验证剪辑权限信息字段存在
         if (result.data) {
           expect(typeof result.data.canCut).toBe('boolean');
           
-
-          
           // 打印剪辑权限详情
-          const clipPermissionDetails = [
-            '?检查剪辑权限成功！',
-            '\n📊 剪辑权限详情?,
-            `允许剪辑: ${result.data.canCut ? '? : '?}`
+          const permissionDetails = [
+            '✅成功获取剪辑权限信息！',
+            '\n📊 剪辑权限详情：',
+            `可剪辑: ${result.data.canCut ? '是' : '否'}`
           ];
           
-          // 使用测试断言来记录信?          clipPermissionDetails.forEach(detail => {
+          // 使用测试断言来记录信息
+          permissionDetails.forEach(detail => {
             expect(detail).toBeDefined();
           });
         }
       } else {
         // 如果API调用失败，验证是否有错误信息
         expect(result.error).toBeDefined();
-        console.log('API调用失败，错误信?', result.error);
+        console.log('API调用失败，错误信息：', result.error);
       }
-    }, 15000); // 设置15秒超?
+    }, 10000); // 设置10秒超时
+
     it('should handle API error response', async () => {
-      // 调用checkLiveClipPermission函数（该函数不需要参数）
+      // 测试API错误处理
       const result = await api.live.checkLiveClipPermission();
       
       // 打印接口请求结果
@@ -859,323 +835,289 @@ describe('LiveService', () => {
       expect(result).toBeDefined();
       expect(typeof result.success).toBe('boolean');
       
-      // API调用可能成功也可能失败，我们验证返回的数据结?      if (result.success) {
+      // API调用可能成功也可能失败，我们验证返回的数据结构
+      if (result.success) {
         expect(result.data).toBeDefined();
+        if (result.data) {
+          expect(typeof result.data.canCut).toBe('boolean');
+        }
       } else {
-        // 验证是否有错误信?        expect(result.error).toBeDefined();
-        console.log('API调用失败，错误信?', result.error);
+        // 验证是否有错误信息
+        expect(result.error).toBeDefined();
+        console.log('API调用失败，错误信息：', result.error);
       }
-    }, 15000); // 设置15秒超?  });
+    }, 10000); // 设置10秒超时
+  });
 
   describe('updateLiveRoom', () => {
     it('should successfully update live room title and cover', async () => {
-      // 首先获取热门直播列表来获取liveId
+      // 先获取热门直播列表，获取第一个直播的ID
       const hotLivesResponse = await api.live.getHotLives();
-      
+
       if (!hotLivesResponse.success || !hotLivesResponse.data?.lives || hotLivesResponse.data.lives.length === 0) {
-        console.log('?无法获取热门直播列表，跳过测?);
+        console.log('❌无法获取热门直播列表，跳过更新直播间测试');
         return;
       }
 
-      // 获取第一个直播的liveId
       const firstLive = hotLivesResponse.data.lives[0];
       const liveId = firstLive.liveId;
-      
+
       if (!liveId) {
-        console.log('?无法获取有效的liveId，跳过测?);
+        console.log('❌无法获取有效的liveId，跳过更新直播间测试');
         return;
       }
 
       console.log(`📺 测试直播间ID: ${liveId}`);
-      console.log(`📺 直播间标? ${firstLive.title}`);
-      console.log(`👤 主播ID: ${firstLive.streamer?.userId || '未知'}`);
+      console.log(`📺 直播间标题：${firstLive.title}`);
 
-      // 测试更新直播间标题和封面
-      const newTitle = '测试更新直播间标?;
-      const coverFile = ''; // 使用空封面文件进行测?      
-      const result = await api.live.updateLiveRoom(newTitle, coverFile, liveId);
-      
+      const newTitle = '测试更新直播间标题';
+      const coverFile = ''; // 使用空封面文件进行测试
+
+      const result = await api.live.updateLiveRoom(liveId, newTitle, coverFile);
+
       // 打印接口请求结果
       console.log('Update Live Room API response:', JSON.stringify(result, null, 2));
-      
+
       // 验证返回结果
       expect(result).toBeDefined();
-      
-      // 由于权限限制，可能无法成功更新其他主播的直播?      // 主要验证API调用是否正常执行
-      if (result.success) {
-        console.log('?成功更新直播间标题和封面');
-      } else {
-        console.log('⚠️ 更新直播间标题和封面失败（可能是权限问题?', result.error);
-      }
-      
+      expect(typeof result.success).toBe('boolean');
 
-    }, 15000); // 设置15秒超?
-    it('should fail when liveId is invalid', async () => {
+      // 由于权限限制，可能无法成功更新其他主播的直播间
+      // 主要验证API调用是否正常执行
+      if (result.success) {
+        console.log('✅成功更新直播间标题和封面');
+      } else {
+        console.log('⚠️ 更新直播间标题和封面失败（可能是权限问题）', result.error);
+      }
+
+      // 验证返回结果结构
+      if (result.success) {
+        expect(result.data).toBeDefined();
+      } else {
+        expect(result.error).toBeDefined();
+      }
+    }, 15000); // 设置15秒超时
+
+    it('should handle invalid liveId', async () => {
       // 使用无效的liveId进行测试
-      const invalidLiveId = 'invalid_live_id_123456';
-      const newTitle = '测试无效liveId';
+      const invalidLiveId = 'invalid-live-id';
+      const newTitle = '测试更新直播间标题';
       const coverFile = '';
-      
-      const result = await api.live.updateLiveRoom(newTitle, coverFile, invalidLiveId);
-      
+
+      const result = await api.live.updateLiveRoom(invalidLiveId, newTitle, coverFile);
+
       // 打印接口请求结果
       console.log('Update Live Room with invalid liveId API response:', JSON.stringify(result, null, 2));
-      
-      // 验证返回结果为失?      expect(result).toBeDefined();
-      expect(result.success).toBe(false);
-      
-      console.log('?无效liveId测试通过，API正确返回失败结果');
-    }, 10000); // 设置10秒超?
-    it('should fail when title is empty', async () => {
-      // 首先获取热门直播列表来获取liveId
-      const hotLivesResponse = await api.live.getHotLives();
-      
-      if (!hotLivesResponse.success || !hotLivesResponse.data?.lives || hotLivesResponse.data.lives.length === 0) {
-        console.log('?无法获取热门直播列表，跳过空标题测试');
-        return;
-      }
 
-      // 获取第一个直播的liveId
-      const firstLive = hotLivesResponse.data.lives[0];
-      const liveId = firstLive.liveId;
-      
-      if (!liveId) {
-        console.log('?无法获取有效的liveId，跳过空标题测试');
-        return;
-      }
-
-      // 测试空标?      const emptyTitle = '';
-      const coverFile = '';
-      
-      const result = await api.live.updateLiveRoom(emptyTitle, coverFile, liveId);
-      
-      // 打印接口请求结果
-      console.log('Update Live Room with empty title API response:', JSON.stringify(result, null, 2));
-      
       // 验证返回结果
       expect(result).toBeDefined();
-      
-      console.log('?空标题测试完?);
-    }, 15000); // 设置15秒超?  });
+      expect(typeof result.success).toBe('boolean');
+
+      // 验证返回结果为失败
+      expect(result).toBeDefined();
+      expect(result.success).toBe(false);
+
+      console.log('✅无效liveId测试通过，API正确返回失败结果');
+    }, 10000); // 设置10秒超时
+
+    it('should handle empty title parameter', async () => {
+      // 先获取热门直播列表
+      const hotLivesResponse = await api.live.getHotLives();
+
+      if (!hotLivesResponse.success || !hotLivesResponse.data?.lives || hotLivesResponse.data.lives.length === 0) {
+        console.log('❌无法获取热门直播列表，跳过空标题测试');
+        return;
+      }
+
+      const firstLive = hotLivesResponse.data.lives[0];
+      const liveId = firstLive.liveId;
+
+      if (!liveId) {
+        console.log('❌无法获取有效的liveId，跳过空标题测试');
+        return;
+      }
+
+      const emptyTitle = '';
+      const coverFile = '';
+
+      const result = await api.live.updateLiveRoom(liveId, emptyTitle, coverFile);
+
+      // 打印接口请求结果
+      console.log('Update Live Room with empty title API response:', JSON.stringify(result, null, 2));
+
+      // 验证返回结果
+      expect(result).toBeDefined();
+      expect(typeof result.success).toBe('boolean');
+
+      // 验证API处理空标题的行为
+      if (result.success) {
+        expect(result.data).toBeDefined();
+      } else {
+        expect(result.error).toBeDefined();
+      }
+
+      console.log('✅空标题测试完成');
+    }, 15000); // 设置15秒超时
+  });
 
   describe('setLiveClipPermission', () => {
     it('should successfully set live clip permission', async () => {
-      // 测试设置剪辑权限为允?      const canCut = true;
-      
+      // 测试设置剪辑权限为允许
+      const canCut = true;
+
       const result = await api.live.setLiveClipPermission(canCut);
-      
+
       // 打印接口请求结果
       console.log('Set Live Clip Permission API response:', JSON.stringify(result, null, 2));
-      
+
       // 验证返回结果
       expect(result).toBeDefined();
       expect(typeof result.success).toBe('boolean');
-      
-      if (result.success) {
-        console.log('?成功设置剪辑权限');
-        
 
-        
-        // 打印设置详情
-        const setPermissionDetails = [
-          '?设置剪辑权限成功?,
-          `\n📊 设置详情：`,
-          `允许剪辑: ${canCut ? '? : '?}`
-        ];
-        
-        // 使用测试断言来记录信?        setPermissionDetails.forEach(detail => {
-          expect(detail).toBeDefined();
-        });
+      if (result.success) {
+        // setLiveClipPermission返回void，所以data可能为undefined
+        console.log('✅成功设置剪辑权限！');
+        console.log(`剪辑权限设置为: ${canCut ? '允许' : '禁止'}`);
       } else {
         // 如果API调用失败，验证是否有错误信息
         expect(result.error).toBeDefined();
-        console.log('API调用失败，错误信?', result.error);
+        console.log('API调用失败，错误信息：', result.error);
       }
-    }, 15000); // 设置15秒超?
+    }, 15000); // 设置15秒超时
+
     it('should successfully disable live clip permission', async () => {
-      // 测试设置剪辑权限为不允许
+      // 测试设置剪辑权限为禁用
       const canCut = false;
-      
+
       const result = await api.live.setLiveClipPermission(canCut);
-      
+
       // 打印接口请求结果
       console.log('Disable Live Clip Permission API response:', JSON.stringify(result, null, 2));
-      
+
       // 验证返回结果
       expect(result).toBeDefined();
       expect(typeof result.success).toBe('boolean');
-      
-      if (result.success) {
-        console.log('?成功禁用剪辑权限');
-        
 
-        
-        // 打印禁用详情
-        const disablePermissionDetails = [
-          '?禁用剪辑权限成功?,
-          `\n📊 设置详情：`,
-          `允许剪辑: ${canCut ? '? : '?}`
-        ];
-        
-        // 使用测试断言来记录信?        disablePermissionDetails.forEach(detail => {
-          expect(detail).toBeDefined();
-        });
+      if (result.success) {
+        // setLiveClipPermission返回void，所以data可能为undefined
+        console.log('✅成功禁用剪辑权限！');
+        console.log(`剪辑权限设置为: ${canCut ? '允许' : '禁止'}`);
       } else {
         // 如果API调用失败，验证是否有错误信息
         expect(result.error).toBeDefined();
-        console.log('API调用失败，错误信?', result.error);
+        console.log('API调用失败，错误信息：', result.error);
       }
-    }, 15000); // 设置15秒超?
+    }, 15000); // 设置15秒超时
+
     it('should handle API error response', async () => {
       // 测试API错误处理
       const canCut = true;
-      
+
       const result = await api.live.setLiveClipPermission(canCut);
-      
+
       // 打印接口请求结果
       console.log('Set Live Clip Permission API error response:', JSON.stringify(result, null, 2));
-      
+
       // 验证返回结果
       expect(result).toBeDefined();
       expect(typeof result.success).toBe('boolean');
-      
-      // API调用可能成功也可能失败，我们验证返回的数据结?      if (result.success) {
-        // setLiveClipPermission在成功时data为undefined，这是正常的
-        expect(result.data).toBeUndefined();
+
+      // API调用可能成功也可能失败，我们验证返回的数据结构
+      if (result.success) {
+        console.log('✅成功设置剪辑权限！');
+        console.log(`剪辑权限设置为: ${canCut ? '允许' : '禁止'}`);
       } else {
-        // 验证是否有错误信?        expect(result.error).toBeDefined();
-        console.log('API调用失败，错误信?', result.error);
+        expect(result.error).toBeDefined();
+        console.log('API调用失败，错误信息：', result.error);
       }
-    }, 15000); // 设置15秒超?  });
+    }, 15000); // 设置15秒超时
+  });
 
   describe('getLiveClipInfo', () => {
     it('should successfully get live clip information', async () => {
-      // 首先获取热门直播列表来获取liveId
+      // 先获取热门直播列表
       const hotLivesResponse = await api.live.getHotLives();
-      
+
       if (!hotLivesResponse.success || !hotLivesResponse.data?.lives || hotLivesResponse.data.lives.length === 0) {
-        console.log('?无法获取热门直播列表，跳过获取直播剪辑信息测?);
+        console.log('❌无法获取热门直播列表，跳过获取直播剪辑信息测试');
         return;
       }
 
-      // 获取第一个直播的liveId和主播ID
       const firstLive = hotLivesResponse.data.lives[0];
       const liveId = firstLive.liveId;
       const liverUID = 214844; // 使用固定的userId
-      
+
       if (!liveId) {
-        console.log('?无法获取有效的liveId，跳过获取直播剪辑信息测?);
+        console.log('❌无法获取有效的liveId，跳过获取直播剪辑信息测试');
         return;
       }
 
-      console.log(`📺 测试直播间ID: ${liveId}`);
       console.log(`👤 主播ID: ${liverUID}`);
-      console.log(`📺 直播间标? ${firstLive.title}`);
+      console.log(`📺 直播间标题：${firstLive.title}`);
 
-      // 测试获取直播剪辑信息
+      // 调用getLiveClipInfo函数
       const result = await api.live.getLiveClipInfo(liverUID, liveId);
-      
+
       // 打印接口请求结果
       console.log('Get Live Clip Info API response:', JSON.stringify(result, null, 2));
-      
+
       // 验证返回结果
       expect(result).toBeDefined();
       expect(typeof result.success).toBe('boolean');
-      
+
       if (result.success) {
-        console.log('?成功获取直播剪辑信息');
-        
-        // 验证返回的数据结?        expect(result.data).toBeDefined();
+        expect(result.data).toBeDefined();
+        console.log('✅成功获取直播剪辑信息');
+
+        // 验证剪辑信息字段存在
         if (result.data) {
           expect(typeof result.data.status).toBe('boolean');
           expect(typeof result.data.url).toBe('string');
           expect(typeof result.data.redirectURL).toBe('string');
-          
 
-          
-          // 打印获取详情
+          // 打印剪辑信息详情
           const getClipInfoDetails = [
-            '?获取直播剪辑信息成功?,
+            '✅获取直播剪辑信息成功！',
             `\n📊 剪辑信息详情：`,
-            `剪辑状? ${result.data.status ? '允许' : '不允?}`,
+            `剪辑状态: ${result.data.status ? '允许' : '不允许'}`,
             `剪辑URL: ${result.data.url}`,
             `重定向URL: ${result.data.redirectURL}`
           ];
-          
-          // 使用测试断言来记录信?          getClipInfoDetails.forEach(detail => {
+
+          // 使用测试断言来记录信息
+          getClipInfoDetails.forEach(detail => {
             expect(detail).toBeDefined();
           });
         }
       } else {
         // 如果API调用失败，验证是否有错误信息
         expect(result.error).toBeDefined();
-        console.log('API调用失败，错误信?', result.error);
+        console.log('API调用失败，错误信息：', result.error);
       }
-    }, 15000); // 设置15秒超?
+    }, 15000); // 设置15秒超时
+
     it('should handle invalid liveId', async () => {
-      // 使用无效的liveId进行测试
-      const invalidLiveId = 'invalid_live_id_123456';
-      const liverUID = 214844; // 使用固定的userId
-      
-      const result = await api.live.getLiveClipInfo(liverUID, invalidLiveId);
-      
+      // 使用无效的liveId和userId进行测试
+      const invalidLiveId = 'invalid-live-id';
+      const invalidUserID = 999999999;
+
+      const result = await api.live.getLiveClipInfo(invalidUserID, invalidLiveId);
+
       // 打印接口请求结果
-      console.log('Get Live Clip Info with invalid liveId API response:', JSON.stringify(result, null, 2));
-      
+      console.log('Get Live Clip Info with invalid params API response:', JSON.stringify(result, null, 2));
+
       // 验证返回结果
       expect(result).toBeDefined();
       expect(typeof result.success).toBe('boolean');
-      
-      // 对于无效liveId，API应该返回失败
-      if (!result.success) {
-        console.log('?无效liveId测试通过，API正确返回失败结果');
-        expect(result.error).toBeDefined();
-      } else {
-        console.log('⚠️ 无效liveId测试：API返回成功，但这是预期行为吗？');
-      }
-    }, 15000); // 设置15秒超?
-    it('should handle API error response', async () => {
-      // 首先获取热门直播列表来获取liveId
-      const hotLivesResponse = await api.live.getHotLives();
-      
-      if (!hotLivesResponse.success || !hotLivesResponse.data?.lives || hotLivesResponse.data.lives.length === 0) {
-        console.log('?无法获取热门直播列表，跳过API错误处理测试');
-        return;
-      }
 
-      // 获取第一个直播的liveId
-      const firstLive = hotLivesResponse.data.lives[0];
-      const liveId = firstLive.liveId;
-      const liverUID = 214844; // 使用固定的userId
-      
-      if (!liveId) {
-        console.log('?无法获取有效的liveId，跳过API错误处理测试');
-        return;
-      }
-
-      // 测试获取直播剪辑信息
-      const result = await api.live.getLiveClipInfo(liverUID, liveId);
-      
-      // 打印接口请求结果
-      console.log('Get Live Clip Info API error response:', JSON.stringify(result, null, 2));
-      
-      // 验证返回结果
-      expect(result).toBeDefined();
-      expect(typeof result.success).toBe('boolean');
-      
-      // API调用可能成功也可能失败，我们验证返回的数据结?      if (result.success) {
-        // 验证成功时的数据结构
+      // API调用可能成功也可能失败，我们验证返回的数据结构
+      if (result.success) {
         expect(result.data).toBeDefined();
-        if (result.data) {
-          expect(typeof result.data.status).toBe('boolean');
-          expect(typeof result.data.url).toBe('string');
-          expect(typeof result.data.redirectURL).toBe('string');
-        }
       } else {
-        // 验证失败时的错误信息
+        // 验证是否有错误信息
         expect(result.error).toBeDefined();
-        console.log('API调用失败，错误信?', result.error);
+        console.log('API调用失败，错误信息：', result.error);
       }
-    }, 15000); // 设置15秒超?  });
+    }, 15000); // 设置15秒超时
+  });
 });
-

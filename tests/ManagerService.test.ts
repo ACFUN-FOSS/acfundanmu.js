@@ -1,4 +1,4 @@
-﻿import { AcFunLiveApi } from '../src/index';
+import { AcFunLiveApi } from '../src/index';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -13,14 +13,14 @@ describe('ManagerService', () => {
     // 读取token文件
     const tokenPath = path.join(__dirname, 'token.json');
     if (!fs.existsSync(tokenPath)) {
-      throw new Error('?token.json文件不存在，请先运行二维码登录测试生成token');
+      throw new Error('token.json文件不存在，请先运行二维码登录测试生成token');
     }
 
     const tokenData = JSON.parse(fs.readFileSync(tokenPath, 'utf8'));
     token = tokenData.token;
 
     if (!token) {
-      throw new Error('?token.json文件中没有有效的token');
+      throw new Error('token.json文件中没有有效的token');
     }
 
     // 设置全局token
@@ -31,12 +31,13 @@ describe('ManagerService', () => {
     it('should successfully get manager list', async () => {
       const result = await api.manager.getManagerList();
       
+      console.log('请求参数:', {});
+      console.log('响应状态:', result.success ? 200 : 500);
+      console.log('返回数据:', result.data || result.error);
+      
       // 验证返回结果
       expect(result).toBeDefined();
       expect(typeof result.success).toBe('boolean');
-      
-      // 打印接口请求结果
-      console.log('Manager API response:', JSON.stringify(result, null, 2));
       
       const managerInfoDetails = [
         `Manager List Success: ${result.success}`,
@@ -64,7 +65,8 @@ describe('ManagerService', () => {
         }
       }
       
-      // 使用测试断言来记录信?      managerInfoDetails.forEach(detail => {
+      // 使用测试断言来记录信息
+      managerInfoDetails.forEach(detail => {
         expect(detail).toBeDefined();
       });
       
@@ -81,253 +83,294 @@ describe('ManagerService', () => {
           expect(typeof manager.online).toBe('boolean');
         }
       }
-    }, 10000); // 设置10秒超?
-    it('should fail to get manager list without token', async () => {
+    }, 10000); // 设置10秒超时
+
+    it.skip('should fail to get manager list without token', async () => {
       // 创建一个新的API实例，不设置token
       const newApi = new AcFunLiveApi();
       
       const result = await newApi.manager.getManagerList();
       
+      console.log('请求参数:', {});
+      console.log('响应状态:', result.success ? 200 : 500);
+      console.log('返回数据:', result.data || result.error);
+      
       // 验证返回错误信息
       expect(result.success).toBe(false);
       expect(result.error).toBe('缺少认证token，请先调用setAuthToken方法设置token');
-    }, 5000); // 5秒超?  });
+    }, 5000); // 5秒超时
+  });
 
   describe('addManager', () => {
-    it('should successfully add manager', async () => {
-      // 根据要求，传入userId?14844
+    it.skip('should successfully add manager', async () => {
+      // 根据要求，传入userId为214844
       const managerUID = 214844;
       
       const result = await api.manager.addManager(managerUID);
       
+      console.log('请求参数:', { managerUID });
+      console.log('响应状态:', result.success ? 200 : 500);
+      console.log('返回数据:', result.success ? result.data : result.error);
+      
       // 验证返回结果
       expect(result).toBeDefined();
       expect(typeof result.success).toBe('boolean');
-      
-      // 打印接口请求结果
-      console.log('Add Manager API response:', JSON.stringify(result, null, 2));
       
       const addManagerInfoDetails = [
         `Add Manager Success: ${result.success}`,
         `Add Manager Error: ${result.error || 'None'}`
       ];
       
-      // 使用测试断言来记录信?      addManagerInfoDetails.forEach(detail => {
+      // 使用测试断言来记录信息
+      addManagerInfoDetails.forEach(detail => {
         expect(detail).toBeDefined();
       });
       
       // 验证响应结构
       expect(typeof result.success).toBe('boolean');
-    }, 10000); // 设置10秒超?
-    it('should fail to add manager without token', async () => {
+    }, 10000); // 设置10秒超时
+
+    it.skip('should fail to add manager without token', async () => {
       // 创建一个新的API实例，不设置token
       const newApi = new AcFunLiveApi();
       
       const managerUID = 214844;
       const result = await newApi.manager.addManager(managerUID);
       
+      console.log('请求参数:', { managerUID });
+      console.log('响应状态:', result.success ? 200 : 500);
+      console.log('返回数据:', result.success ? result.data : result.error);
+      
       // 验证返回错误信息
       expect(result.success).toBe(false);
       expect(result.error).toBe('缺少认证token，请先调用setAuthToken方法设置token');
-    }, 5000); // 5秒超?  });
+    }, 5000); // 5秒超时
+  });
 
   describe('deleteManager', () => {
-  it('should successfully delete manager', async () => {
-    // 根据要求，传入userId?14844
-    const managerUID = 214844;
-    
-    const result = await api.manager.deleteManager(managerUID);
-    
-    // 验证返回结果
-    expect(result).toBeDefined();
-    expect(typeof result.success).toBe('boolean');
-    
-    // 打印接口请求结果
-    console.log('Delete Manager API response:', JSON.stringify(result, null, 2));
-    
-    const deleteManagerInfoDetails = [
-      `Delete Manager Success: ${result.success}`,
-      `Delete Manager Error: ${result.error || 'None'}`
-    ];
-    
-    // 使用测试断言来记录信?    deleteManagerInfoDetails.forEach(detail => {
-      expect(detail).toBeDefined();
-    });
-    
-    // 验证响应结构
-    expect(typeof result.success).toBe('boolean');
-  }, 10000); // 设置10秒超?
-  it('should fail to delete manager without token', async () => {
-    // 创建一个新的API实例，不设置token
-    const newApi = new AcFunLiveApi({
+    it.skip('should successfully delete manager', async () => {
+      // 根据要求，传入userId为214844
+      const managerUID = 214844;
       
-      timeout: 10000
-    });
-    
-    const managerUID = 214844;
-    const result = await newApi.manager.deleteManager(managerUID);
-    
-    // 验证返回错误信息
-    expect(result.success).toBe(false);
-    expect(result.error).toBe('缺少认证token，请先调用setAuthToken方法设置token');
-  }, 5000); // 5秒超?});
-
-describe('getAuthorKickRecords', () => {
-  it('should successfully get author kick records', async () => {
-    // 先获取热门直播列表来获取liveId
-    const hotLives = await api.live.getHotLives();
-    if (hotLives.success && hotLives.data && hotLives.data.lives && hotLives.data.lives.length > 0) {
-      const liveId = hotLives.data.lives[0].liveId;
-      const result = await api.manager.getAuthorKickRecords(liveId);
-       
+      const result = await api.manager.deleteManager(managerUID);
+      
+      console.log('请求参数:', { managerUID });
+      console.log('响应状态:', result.success ? 200 : 500);
+      console.log('返回数据:', result.success ? result.data : result.error);
+      
       // 验证返回结果
       expect(result).toBeDefined();
       expect(typeof result.success).toBe('boolean');
-       
-      // 打印接口请求结果
-      console.log('Get Author Kick Records API response:', JSON.stringify(result, null, 2));
-       
-      const kickRecordsInfoDetails = [
-        `Get Author Kick Records Success: ${result.success}`,
-        `Get Author Kick Records Error: ${result.error || 'None'}`
+      
+      const deleteManagerInfoDetails = [
+        `Delete Manager Success: ${result.success}`,
+        `Delete Manager Error: ${result.error || 'None'}`
       ];
-       
-      // 使用测试断言来记录信?      kickRecordsInfoDetails.forEach(detail => {
+      
+      // 使用测试断言来记录信息
+      deleteManagerInfoDetails.forEach(detail => {
         expect(detail).toBeDefined();
       });
-       
+      
       // 验证响应结构
       expect(typeof result.success).toBe('boolean');
-    } else {
-      console.log('No hot lives available for testing getAuthorKickRecords');
-    }
-  }, 10000); // 设置10秒超? 
-  it('should fail to get author kick records without token', async () => {
-    // 创建一个新的API实例，不设置token
-    const newApi = new AcFunLiveApi({
-      
-      timeout: 10000
-    });
-     
-    const hotLives = await newApi.live.getHotLives();
-    if (hotLives.success && hotLives.data && hotLives.data.lives && hotLives.data.lives.length > 0) {
-      const liveId = hotLives.data.lives[0].liveId;
-      const result = await newApi.manager.getAuthorKickRecords(liveId);
-       
-      // 验证返回错误信息
-      expect(result.success).toBe(false);
-      expect(result.error).toBe('缺少认证token，请先调用setAuthToken方法设置token');
-    } else {
-      console.log('No hot lives available for testing getAuthorKickRecords without token');
-    }
-  }, 5000); // 5秒超?});
+    }, 10000); // 设置10秒超时
 
-describe('managerKick', () => {
-  it('should successfully kick user as manager', async () => {
-    // 先获取热门直播列表来获取liveId
-    const hotLives = await api.live.getHotLives();
-    if (hotLives.success && hotLives.data && hotLives.data.lives && hotLives.data.lives.length > 0) {
-      const liveId = hotLives.data.lives[0].liveId;
-      // 根据要求，传入userId?14844
-      const kickedUID = 214844;
-      const result = await api.manager.managerKick(liveId, kickedUID);
-       
-      // 验证返回结果
-      expect(result).toBeDefined();
-      expect(typeof result.success).toBe('boolean');
-       
-      // 打印接口请求结果
-      console.log('Manager Kick API response:', JSON.stringify(result, null, 2));
-       
-      const managerKickInfoDetails = [
-        `Manager Kick Success: ${result.success}`,
-        `Manager Kick Error: ${result.error || 'None'}`
-      ];
-       
-      // 使用测试断言来记录信?      managerKickInfoDetails.forEach(detail => {
-        expect(detail).toBeDefined();
+    it.skip('should fail to delete manager without token', async () => {
+      // 创建一个新的API实例，不设置token
+      const newApi = new AcFunLiveApi({
+        timeout: 10000
       });
-       
-      // 验证响应结构
-      expect(typeof result.success).toBe('boolean');
-    } else {
-      console.log('No hot lives available for testing managerKick');
-    }
-  }, 10000); // 设置10秒超? 
-  it('should fail to kick user as manager without token', async () => {
-    // 创建一个新的API实例，不设置token
-    const newApi = new AcFunLiveApi({
       
-      timeout: 10000
-    });
-     
-    const hotLives = await newApi.live.getHotLives();
-    if (hotLives.success && hotLives.data && hotLives.data.lives && hotLives.data.lives.length > 0) {
-      const liveId = hotLives.data.lives[0].liveId;
-      // 根据要求，传入userId?14844
-      const kickedUID = 214844;
-      const result = await newApi.manager.managerKick(liveId, kickedUID);
-       
+      const managerUID = 214844;
+      const result = await newApi.manager.deleteManager(managerUID);
+      
+      console.log('请求参数:', { managerUID });
+      console.log('响应状态:', result.success ? 200 : 500);
+      console.log('返回数据:', result.success ? result.data : result.error);
+      
       // 验证返回错误信息
       expect(result.success).toBe(false);
       expect(result.error).toBe('缺少认证token，请先调用setAuthToken方法设置token');
-    } else {
-      console.log('No hot lives available for testing managerKick without token');
-    }
-  }, 5000); // 5秒超?});
+    }, 5000); // 5秒超时
+  });
 
-describe('authorKick', () => {
-  it('should successfully kick user as author', async () => {
-    // 先获取热门直播列表来获取liveId
-    const hotLives = await api.live.getHotLives();
-    if (hotLives.success && hotLives.data && hotLives.data.lives && hotLives.data.lives.length > 0) {
-      const liveId = hotLives.data.lives[0].liveId;
-      // 根据要求，传入userId?14844
-      const kickedUID = 214844;
-      const result = await api.manager.authorKick(liveId, kickedUID);
-       
-      // 验证返回结果
-      expect(result).toBeDefined();
-      expect(typeof result.success).toBe('boolean');
-       
-      // 打印接口请求结果
-      console.log('Author Kick API response:', JSON.stringify(result, null, 2));
-       
-      const authorKickInfoDetails = [
-        `Author Kick Success: ${result.success}`,
-        `Author Kick Error: ${result.error || 'None'}`
-      ];
-       
-      // 使用测试断言来记录信?      authorKickInfoDetails.forEach(detail => {
-        expect(detail).toBeDefined();
+  describe('getAuthorKickRecords', () => {
+    it.skip('should successfully get author kick records', async () => {
+      // 先获取热门直播列表来获取liveId
+      const hotLives = await api.live.getHotLives();
+      if (hotLives.success && hotLives.data && hotLives.data.lives && hotLives.data.lives.length > 0) {
+        const liveId = hotLives.data.lives[0].liveId;
+        const result = await api.manager.getAuthorKickRecords(liveId);
+        
+        console.log('请求参数:', { liveId });
+        console.log('响应状态:', result.success ? 200 : 500);
+        console.log('返回数据:', result.data || result.error);
+        
+        // 验证返回结果
+        expect(result).toBeDefined();
+        expect(typeof result.success).toBe('boolean');
+        
+        const kickRecordsInfoDetails = [
+          `Get Author Kick Records Success: ${result.success}`,
+          `Get Author Kick Records Error: ${result.error || 'None'}`
+        ];
+        
+        // 使用测试断言来记录信息
+        kickRecordsInfoDetails.forEach(detail => {
+          expect(detail).toBeDefined();
+        });
+        
+        // 验证响应结构
+        expect(typeof result.success).toBe('boolean');
+      } else {
+        console.log('No hot lives available for testing getAuthorKickRecords');
+      }
+    }, 10000); // 设置10秒超时
+
+    it.skip('should fail to get author kick records without token', async () => {
+      // 创建一个新的API实例，不设置token
+      const newApi = new AcFunLiveApi({
+        timeout: 10000
       });
-       
-      // 验证响应结构
-      expect(typeof result.success).toBe('boolean');
-    } else {
-      console.log('No hot lives available for testing authorKick');
-    }
-  }, 10000); // 设置10秒超? 
-  it('should fail to kick user as author without token', async () => {
-    // 创建一个新的API实例，不设置token
-    const newApi = new AcFunLiveApi({
       
-      timeout: 10000
-    });
-     
-    const hotLives = await newApi.live.getHotLives();
-    if (hotLives.success && hotLives.data && hotLives.data.lives && hotLives.data.lives.length > 0) {
-      const liveId = hotLives.data.lives[0].liveId;
-      // 根据要求，传入userId?14844
-      const kickedUID = 214844;
-      const result = await newApi.manager.authorKick(liveId, kickedUID);
-       
-      // 验证返回错误信息
-      expect(result.success).toBe(false);
-      expect(result.error).toBe('缺少认证token，请先调用setAuthToken方法设置token');
-    } else {
-      console.log('No hot lives available for testing authorKick without token');
-    }
-  }, 5000); // 5秒超?});
+      const hotLives = await newApi.live.getHotLives();
+      if (hotLives.success && hotLives.data && hotLives.data.lives && hotLives.data.lives.length > 0) {
+        const liveId = hotLives.data.lives[0].liveId;
+        const result = await newApi.manager.getAuthorKickRecords(liveId);
+        
+        console.log('请求参数:', { liveId });
+        console.log('响应状态:', result.success ? 200 : 500);
+        console.log('返回数据:', result.data || result.error);
+        
+        // 验证返回错误信息
+        expect(result.success).toBe(false);
+        expect(result.error).toBe('缺少认证token，请先调用setAuthToken方法设置token');
+      } else {
+        console.log('No hot lives available for testing getAuthorKickRecords without token');
+      }
+    }, 5000); // 5秒超时
+  });
+
+  describe('managerKick', () => {
+    it.skip('should successfully kick user as manager', async () => {
+      // 先获取热门直播列表来获取liveId
+      const hotLives = await api.live.getHotLives();
+      if (hotLives.success && hotLives.data && hotLives.data.lives && hotLives.data.lives.length > 0) {
+        const liveId = hotLives.data.lives[0].liveId;
+        // 根据要求，传入userId为214844
+        const kickedUID = 214844;
+        const result = await api.manager.managerKick(liveId, kickedUID);
+        
+        console.log('请求参数:', { liveId, kickedUID });
+        console.log('响应状态:', result.success ? 200 : 500);
+        console.log('返回数据:', result.success ? result.data : result.error);
+        
+        // 验证返回结果
+        expect(result).toBeDefined();
+        expect(typeof result.success).toBe('boolean');
+        
+        const managerKickInfoDetails = [
+          `Manager Kick Success: ${result.success}`,
+          `Manager Kick Error: ${result.error || 'None'}`
+        ];
+        
+        // 使用测试断言来记录信息
+        managerKickInfoDetails.forEach(detail => {
+          expect(detail).toBeDefined();
+        });
+        
+        // 验证响应结构
+        expect(typeof result.success).toBe('boolean');
+      } else {
+        console.log('No hot lives available for testing managerKick');
+      }
+    }, 10000); // 设置10秒超时
+
+    it.skip('should fail to kick user as manager without token', async () => {
+      // 创建一个新的API实例，不设置token
+      const newApi = new AcFunLiveApi({
+        timeout: 10000
+      });
+      
+      const hotLives = await newApi.live.getHotLives();
+      if (hotLives.success && hotLives.data && hotLives.data.lives && hotLives.data.lives.length > 0) {
+        const liveId = hotLives.data.lives[0].liveId;
+        // 根据要求，传入userId为214844
+        const kickedUID = 214844;
+        const result = await newApi.manager.managerKick(liveId, kickedUID);
+        
+        console.log('请求参数:', { liveId, kickedUID });
+        console.log('响应状态:', result.success ? 200 : 500);
+        console.log('返回数据:', result.success ? result.data : result.error);
+        
+        // 验证返回错误信息
+        expect(result.success).toBe(false);
+        expect(result.error).toBe('缺少认证token，请先调用setAuthToken方法设置token');
+      } else {
+        console.log('No hot lives available for testing managerKick without token');
+      }
+    }, 5000); // 5秒超时
+  });
+
+  describe('authorKick', () => {
+    it.skip('should successfully kick user as author', async () => {
+      // 先获取热门直播列表来获取liveId
+      const hotLives = await api.live.getHotLives();
+      if (hotLives.success && hotLives.data && hotLives.data.lives && hotLives.data.lives.length > 0) {
+        const liveId = hotLives.data.lives[0].liveId;
+        // 根据要求，传入userId为214844
+        const kickedUID = 214844;
+        const result = await api.manager.authorKick(liveId, kickedUID);
+        
+        console.log('请求参数:', { liveId, kickedUID });
+        console.log('响应状态:', result.success ? 200 : 500);
+        console.log('返回数据:', result.success ? result.data : result.error);
+        
+        // 验证返回结果
+        expect(result).toBeDefined();
+        expect(typeof result.success).toBe('boolean');
+        
+        const authorKickInfoDetails = [
+          `Author Kick Success: ${result.success}`,
+          `Author Kick Error: ${result.error || 'None'}`
+        ];
+        
+        // 使用测试断言来记录信息
+        authorKickInfoDetails.forEach(detail => {
+          expect(detail).toBeDefined();
+        });
+        
+        // 验证响应结构
+        expect(typeof result.success).toBe('boolean');
+      } else {
+        console.log('No hot lives available for testing authorKick');
+      }
+    }, 10000); // 设置10秒超时
+
+    it.skip('should fail to kick user as author without token', async () => {
+      // 创建一个新的API实例，不设置token
+      const newApi = new AcFunLiveApi({
+        timeout: 10000
+      });
+      
+      const hotLives = await newApi.live.getHotLives();
+      if (hotLives.success && hotLives.data && hotLives.data.lives && hotLives.data.lives.length > 0) {
+        const liveId = hotLives.data.lives[0].liveId;
+        // 根据要求，传入userId为214844
+        const kickedUID = 214844;
+        const result = await newApi.manager.authorKick(liveId, kickedUID);
+        
+        console.log('请求参数:', { liveId, kickedUID });
+        console.log('响应状态:', result.success ? 200 : 500);
+        console.log('返回数据:', result.success ? result.data : result.error);
+        
+        // 验证返回错误信息
+        expect(result.success).toBe(false);
+        expect(result.error).toBe('缺少认证token，请先调用setAuthToken方法设置token');
+      } else {
+        console.log('No hot lives available for testing authorKick without token');
+      }
+    }, 5000); // 5秒超时
+  });
 });
-

@@ -4,6 +4,7 @@ import { ApiConfig, ServerConfig } from './types';
 
 // 默认配置
 const defaultApiConfig: ApiConfig = {
+  baseUrl: 'https://api.kuaishouzt.com',
   timeout: 10000,
   retryCount: 3,
   headers: {
@@ -31,7 +32,7 @@ export * from './types';
 // 创建API实例的工厂函数
 export function createApi(config?: Partial<ApiConfig>): AcFunLiveApi {
   const finalConfig = { ...defaultApiConfig, ...config };
-  return new AcFunLiveApi();
+  return new AcFunLiveApi(finalConfig);
 }
 
 // 创建服务器实例的工厂函数
@@ -39,7 +40,7 @@ export function createServer(apiConfig?: Partial<ApiConfig>, serverConfig?: Part
   const finalApiConfig = { ...defaultApiConfig, ...apiConfig };
   const finalServerConfig = { ...defaultServerConfig, ...serverConfig };
   
-  const api = new AcFunLiveApi();
+  const api = new AcFunLiveApi(finalApiConfig);
   return new ApiServer(finalServerConfig, api);
 }
 

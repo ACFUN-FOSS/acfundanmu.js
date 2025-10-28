@@ -146,6 +146,7 @@ export interface CommandResponse {
 
 // 配置类型
 export interface ApiConfig {
+  baseUrl?: string;
   timeout?: number;
   retryCount?: number;
   headers?: Record<string, string>;

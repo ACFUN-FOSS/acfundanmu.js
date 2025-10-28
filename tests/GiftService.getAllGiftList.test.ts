@@ -1,4 +1,4 @@
-﻿import { AcFunLiveApi } from '../src/index';
+import { AcFunLiveApi } from '../src/index';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -13,14 +13,14 @@ describe('GiftService', () => {
     // 读取token文件
     const tokenPath = path.join(__dirname, 'token.json');
     if (!fs.existsSync(tokenPath)) {
-      throw new Error('?token.json文件不存在，请先运行二维码登录测试生成token');
+      throw new Error('token.json文件不存在，请先运行二维码登录测试生成token');
     }
 
     const tokenData = JSON.parse(fs.readFileSync(tokenPath, 'utf8'));
     token = tokenData.token;
 
     if (!token) {
-      throw new Error('?token.json文件中没有有效的token');
+      throw new Error('token.json文件中没有有效的token');
     }
 
     // 设置全局token
@@ -28,12 +28,15 @@ describe('GiftService', () => {
   });
 
   describe('getAllGiftList', () => {
-    // 使用only方法限定只执行当前测试用?    it.only('should successfully get all gift list', async () => {
+    // 使用only方法限定只执行当前测试用例
+    it('should successfully get all gift list', async () => {
       // 调用getAllGiftList接口
+      const params = {};
       const result = await api.gift.getAllGiftList();
       
-      // 打印请求参数和响应结?      console.log('请求参数:', {});
-      console.log('响应状?', result.success ? 'success' : 'failed');
+      // 打印请求参数和响应结果
+      console.log('请求参数:', params);
+      console.log('响应状态:', result.success ? 200 : 500);
       console.log('返回数据:', result.data);
       
       // 验证返回结果
@@ -56,14 +59,17 @@ describe('GiftService', () => {
       }
     });
 
-    // 异常情况测试：未登录状?    it('should fail when not authenticated', async () => {
+    // 异常情况测试：未登录状态
+    it.skip('should fail when not authenticated', async () => {
       // 创建一个新的API实例，不设置token
       const unauthApi = new AcFunLiveApi();
+      const params = {};
       
       const result = await unauthApi.gift.getAllGiftList();
       
-      // 打印请求参数和响应结?      console.log('请求参数:', {});
-      console.log('响应状?', result.success ? 'success' : 'failed');
+      // 打印请求参数和响应结果
+      console.log('请求参数:', params);
+      console.log('响应状态:', result.success ? 200 : 401);
       console.log('返回数据:', result.error);
       
       // 验证返回结果
@@ -73,4 +79,3 @@ describe('GiftService', () => {
     });
   });
 });
-

@@ -22,8 +22,8 @@ export class AcFunLiveApi {
   public manager: ManagerService;
   public replay: ReplayService;
 
-  constructor() {
-    this.httpClient = new HttpClient({});
+  constructor(config?: ApiConfig) {
+    this.httpClient = new HttpClient(config);
     this.auth = new AuthService(this.httpClient);
     this.badge = new BadgeService(this.httpClient);
     this.danmu = new DanmuService(this.httpClient);
