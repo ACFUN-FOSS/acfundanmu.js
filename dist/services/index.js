@@ -1,0 +1,22 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.UserService = exports.ReplayService = exports.ManagerService = exports.LiveService = exports.LivePreviewService = exports.GiftService = exports.DanmuService = exports.BadgeService = exports.AuthService = void 0;
+var AuthService_1 = require("./AuthService");
+Object.defineProperty(exports, "AuthService", { enumerable: true, get: function () { return AuthService_1.AuthService; } });
+var BadgeService_1 = require("./BadgeService");
+Object.defineProperty(exports, "BadgeService", { enumerable: true, get: function () { return BadgeService_1.BadgeService; } });
+var DanmuService_1 = require("./DanmuService");
+Object.defineProperty(exports, "DanmuService", { enumerable: true, get: function () { return DanmuService_1.DanmuService; } });
+var GiftService_1 = require("./GiftService");
+Object.defineProperty(exports, "GiftService", { enumerable: true, get: function () { return GiftService_1.GiftService; } });
+var LivePreviewService_1 = require("./LivePreviewService");
+Object.defineProperty(exports, "LivePreviewService", { enumerable: true, get: function () { return LivePreviewService_1.LivePreviewService; } });
+var LiveService_1 = require("./LiveService");
+Object.defineProperty(exports, "LiveService", { enumerable: true, get: function () { return LiveService_1.LiveService; } });
+var ManagerService_1 = require("./ManagerService");
+Object.defineProperty(exports, "ManagerService", { enumerable: true, get: function () { return ManagerService_1.ManagerService; } });
+var ReplayService_1 = require("./ReplayService");
+Object.defineProperty(exports, "ReplayService", { enumerable: true, get: function () { return ReplayService_1.ReplayService; } });
+var UserService_1 = require("./UserService");
+Object.defineProperty(exports, "UserService", { enumerable: true, get: function () { return UserService_1.UserService; } });
+//# sourceMappingURL=index.js.map

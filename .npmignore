@@ -1,0 +1,41 @@
+# 源码文件（npm 包不需要）
+src/
+tests/
+
+# 配置文件
+tsconfig.json
+.eslintrc.js
+.prettierrc
+
+# 开发依赖相关
+.trae/
+.qoder/
+
+# 测试相关
+coverage/
+*.lcov
+.nyc_output
+
+# 日志文件
+logs/
+*.log
+
+# 环境变量文件
+.env*
+
+# 编辑器配置
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# Git 相关
+.git/
+.gitignore
+
+# 其他
+README.md
