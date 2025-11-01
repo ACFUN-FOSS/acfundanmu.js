@@ -30,7 +30,7 @@ export class ApiServer {
     }));
     
     // 压缩中间件
-    this.app.use(compression());
+    this.app.use(compression() as express.RequestHandler);
     
     // 日志中间件
     this.app.use(morgan('combined'));

@@ -1124,7 +1124,6 @@ export class LiveService {
       formData.append('streamName', streamName);
 
       // 构建完整的Cookie头
-      const { buildCookieString } = await import('../core/ApiUtils');
       const cookieHeader = buildCookieString(tokenInfo.cookies, tokenInfo.deviceID);
 
       // 使用HttpClient.post发送请求 - 绕过apiPost的验证，直接处理快手API响应
@@ -1245,11 +1244,9 @@ export class LiveService {
       }
 
       // 构建完整的Cookie头
-      const { buildCookieString } = await import('../core/ApiUtils');
       const cookieHeader = buildCookieString(tokenInfo.cookies, tokenInfo.deviceID);
 
       // 使用apiPost发送请求
-      const { apiPost } = await import('../core/ApiUtils');
       const response = await apiPost<any>(this.httpClient, fullUrl, requestBody, {
         headers: {
           'Content-Type': contentType,
@@ -1480,7 +1477,6 @@ export class LiveService {
       const url = 'https://member.acfun.cn/liveToll/api/getUserLiveCut';
       
       // 构建完整的Cookie头
-      const { buildCookieString } = await import('../core/ApiUtils');
       const cookieHeader = buildCookieString(tokenInfo.cookies, tokenInfo.deviceID);
 
       // 使用HttpClient.post直接发送请求 - 绕过apiPost的认证检查
@@ -1567,7 +1563,6 @@ export class LiveService {
       const requestBody = JSON.stringify({ status });
       
       // 构建完整的Cookie头
-      const { buildCookieString } = await import('../core/ApiUtils');
       const cookieHeader = buildCookieString(tokenInfo.cookies, tokenInfo.deviceID);
 
       // 使用HttpClient.post直接发送请求 - 遵循UserService.ts的格式规范
@@ -1656,7 +1651,6 @@ export class LiveService {
       }
 
       // 获取AcFun token
-      const { buildCookieString } = await import('../core/ApiUtils');
       const cookieHeader = buildCookieString(tokenInfo.cookies, tokenInfo.deviceID);
       
       const tokenResponse = await this.httpClient.post('https://id.app.acfun.cn/rest/web/token/get', {
