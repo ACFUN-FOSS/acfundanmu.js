@@ -17,7 +17,7 @@ lerna-debug.log*
 .env.production
 
 # 编译产物
-build/
+# build/
 # dist/ - 注释掉，因为需要发布类型声明文件
 
 # TypeScript 编译缓存
