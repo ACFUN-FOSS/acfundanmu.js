@@ -23,17 +23,24 @@ class LiveService {
                 error: '推流地址数据为空'
             };
         }
-        // 提取RTMP服务器地址和推流密钥
-        const streamPushAddress = pushConfig.streamPushAddress[0];
-        if (typeof streamPushAddress !== 'string') {
-            return {
-                success: false,
-                error: '推流地址不是字符串类型'
-            };
+        let rtmpUrl = '';
+        let streamKey = '';
+        if (typeof pushConfig.rtmpServer === 'string' && typeof pushConfig.streamKey === 'string') {
+            rtmpUrl = pushConfig.rtmpServer;
+            streamKey = pushConfig.streamKey;
         }
-        const lastSlashIndex = streamPushAddress.lastIndexOf('/');
-        const rtmpUrl = streamPushAddress.substring(0, lastSlashIndex);
-        const streamKey = streamPushAddress.substring(lastSlashIndex + 1);
+        else {
+            const streamPushAddress = pushConfig.streamPushAddress[0];
+            if (typeof streamPushAddress !== 'string') {
+                return {
+                    success: false,
+                    error: '推流地址不是字符串类型'
+                };
+            }
+            const lastSlashIndex = streamPushAddress.lastIndexOf('/');
+            rtmpUrl = streamPushAddress.substring(0, lastSlashIndex);
+            streamKey = streamPushAddress.substring(lastSlashIndex + 1);
+        }
         // 计算过期时间（假设24小时后过期）
         const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
         const streamInfo = {
@@ -1419,6 +1426,30 @@ class LiveService {
                 error: `获取直播总结失败: ${error instanceof Error ? error.message : String(error)}`,
             };
         }
+    }
+    async getWatchingList(liveId) {
+        if (!liveId || typeof liveId !== 'string') {
+            return { success: false, error: '直播ID不能为空且必须为字符串' };
+        }
+        const response = await (0, ApiUtils_1.kuaiShouApiPost)(this.httpClient, 'https://api.kuaishouzt.com/rest/zt/live/web/watchingList?subBiz=mainApp&kpn=ACFUN_APP&kpf=PC_WEB', '获取直播间观众列表', { liveId });
+        if (!response.success) {
+            return response;
+        }
+        const data = response.data;
+        const list = Array.isArray(data?.list) ? data.list : [];
+        const users = list.map((item) => ({
+            userInfo: {
+                userID: Number(item?.userId) || 0,
+                nickname: String(item?.nickname || ''),
+                avatar: (Array.isArray(item?.avatar) && item.avatar[0]?.url) ? String(item.avatar[0].url) : '',
+                medal: { uperID: 0, userID: 0, clubName: '', level: 0 },
+                managerType: (item?.managerType ?? 0),
+            },
+            anonymousUser: item?.anonymousUser === true,
+            displaySendAmount: String(item?.displaySendAmount ?? ''),
+            customData: String(item?.customWatchingListData ?? ''),
+        }));
+        return { success: true, data: users };
     }
 }
 exports.LiveService = LiveService;

@@ -1,5 +1,5 @@
 import { HttpClient } from '../core/HttpClient';
-import { ApiResponse, LiveRoomInfo } from '../types';
+import { ApiResponse, LiveRoomInfo, WatchingUser } from '../types';
 export declare class LiveService {
     private httpClient;
     constructor(httpClient: HttpClient);
@@ -241,4 +241,5 @@ export declare class LiveService {
         diamondCount: number;
         bananaCount: number;
     }>>;
+    getWatchingList(liveId: string): Promise<ApiResponse<WatchingUser[]>>;
 }
