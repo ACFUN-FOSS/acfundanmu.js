@@ -38,17 +38,23 @@ export class LiveService {
       };
     }
 
-    // 提取RTMP服务器地址和推流密钥
-    const streamPushAddress = pushConfig.streamPushAddress[0];
-    if (typeof streamPushAddress !== 'string') {
-      return {
-        success: false,
-        error: '推流地址不是字符串类型'
-      };
+    let rtmpUrl = '';
+    let streamKey = '';
+    if (typeof pushConfig.rtmpServer === 'string' && typeof pushConfig.streamKey === 'string') {
+      rtmpUrl = pushConfig.rtmpServer;
+      streamKey = pushConfig.streamKey;
+    } else {
+      const streamPushAddress = pushConfig.streamPushAddress[0];
+      if (typeof streamPushAddress !== 'string') {
+        return {
+          success: false,
+          error: '推流地址不是字符串类型'
+        };
+      }
+      const lastSlashIndex = streamPushAddress.lastIndexOf('/');
+      rtmpUrl = streamPushAddress.substring(0, lastSlashIndex);
+      streamKey = streamPushAddress.substring(lastSlashIndex + 1);
     }
-    const lastSlashIndex = streamPushAddress.lastIndexOf('/');
-    const rtmpUrl = streamPushAddress.substring(0, lastSlashIndex);
-    const streamKey = streamPushAddress.substring(lastSlashIndex + 1);
 
     // 计算过期时间（假设24小时后过期）
     const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
