@@ -197,7 +197,19 @@ StreamUrl {
 **参数：**
 - `category?: string` - 分类
 - `page?: number` - 页码(默认0)
-- `size?: number` - 每页数量(默认20)
+ - `size?: number` - 每页数量(默认20)
+
+### getWatchingList - 获取直播间观众列表
+
+返回指定直播间的在线观众列表（最多 50）。
+
+**参数：**
+- `liveId: string` - 直播间 ID
+
+**响应：** `WatchingUser[]`
+
+**HTTP 路由：** `GET /api/live/watching-list/:liveId`
+
 
 ## 用户 API
 

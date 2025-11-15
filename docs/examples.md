@@ -280,3 +280,24 @@ async function monitoringDashboard() {
 ```
 
 更多示例请参阅 [API参考文档](./api-reference.md)。
+
+## 场景9：获取直播间观众列表
+
+```typescript
+import { AcFunLiveApi } from 'acfunlive-http-api';
+
+async function getWatchingList() {
+  const api = new AcFunLiveApi({ baseUrl: 'https://api.kuaishouzt.com' });
+  api.setAuthToken(token);
+
+  const hot = await api.live.getHotLives('', 0, 10);
+  const liveId = hot.success && hot.data.lives[0]?.liveId ? hot.data.lives[0].liveId : '';
+  if (!liveId) return;
+
+  const resp = await api.live.getWatchingList(liveId);
+  if (resp.success) {
+    console.log('观众数量:', resp.data.length);
+    console.log('示例观众:', resp.data.slice(0, 3));
+  }
+}
+```

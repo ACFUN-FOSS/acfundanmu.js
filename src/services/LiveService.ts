@@ -1,5 +1,5 @@
 import { HttpClient } from '../core/HttpClient';
-import { ApiResponse, LiveRoomInfo } from '../types';
+import { ApiResponse, LiveRoomInfo, WatchingUser, ManagerType } from '../types';
 import { apiGet, apiPost, kuaiShouApiPost, buildCookieString, buildFormData, buildCommonHeaders } from '../core/ApiUtils';
 
 export class LiveService {
@@ -1793,5 +1793,40 @@ export class LiveService {
         error: `获取直播总结失败: ${error instanceof Error ? error.message : String(error)}`,
       };
     }
+  }
+
+  public async getWatchingList(liveId: string): Promise<ApiResponse<WatchingUser[]>> {
+    if (!liveId || typeof liveId !== 'string') {
+      return { success: false, error: '直播ID不能为空且必须为字符串' };
+    }
+
+    const response = await kuaiShouApiPost<any>(
+      this.httpClient,
+      'https://api.kuaishouzt.com/rest/zt/live/web/watchingList?subBiz=mainApp&kpn=ACFUN_APP&kpf=PC_WEB',
+      '获取直播间观众列表',
+      { liveId }
+    );
+
+    if (!response.success) {
+      return response as ApiResponse<WatchingUser[]>;
+    }
+
+    const data = response.data;
+    const list = Array.isArray(data?.list) ? data.list : [];
+
+    const users: WatchingUser[] = list.map((item: any) => ({
+      userInfo: {
+        userID: Number(item?.userId) || 0,
+        nickname: String(item?.nickname || ''),
+        avatar: (Array.isArray(item?.avatar) && item.avatar[0]?.url) ? String(item.avatar[0].url) : '',
+        medal: { uperID: 0, userID: 0, clubName: '', level: 0 },
+        managerType: (item?.managerType ?? 0) as ManagerType,
+      },
+      anonymousUser: item?.anonymousUser === true,
+      displaySendAmount: String(item?.displaySendAmount ?? ''),
+      customData: String(item?.customWatchingListData ?? ''),
+    }));
+
+    return { success: true, data: users };
   }
 }

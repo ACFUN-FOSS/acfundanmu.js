@@ -161,6 +161,19 @@ export class ApiServer {
       res.json({ success: false, error: '未实现' });
     });
 
+    router.get('/live/watching-list/:liveId', async (req, res) => {
+      const { liveId } = req.params as { liveId: string };
+      try {
+        const result = await this.api.live.getWatchingList(liveId);
+        res.json(result);
+      } catch (error) {
+        res.status(500).json({
+          success: false,
+          error: `服务器内部错误: ${error instanceof Error ? error.message : String(error)}`
+        });
+      }
+    });
+
     this.app.use('/api', router);
   }
 

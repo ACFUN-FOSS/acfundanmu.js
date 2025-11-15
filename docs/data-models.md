@@ -355,3 +355,13 @@ interface LiveReplay {
   height: number;      // 视频高度
 }
 ```
+### WatchingUser - 在线观众
+
+```typescript
+interface WatchingUser {
+  userInfo: UserInfo;           // 用户信息
+  anonymousUser: boolean;       // 是否匿名用户
+  displaySendAmount: string;    // 赠送礼物总价值（AC币，字符串）
+  customData: string;           // 额外信息（JSON字符串）
+}
+```

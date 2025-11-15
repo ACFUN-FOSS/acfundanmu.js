@@ -173,6 +173,20 @@ if (hotLivesResult.success) {
     console.log('观看:', live.onlineCount);
   });
 }
+
+### 获取直播间观众列表
+
+```typescript
+const hotLivesResult = await api.live.getHotLives('', 0, 10);
+const liveId = hotLivesResult.success && hotLivesResult.data.lives[0]?.liveId ? hotLivesResult.data.lives[0].liveId : '';
+if (liveId) {
+  const watchingResult = await api.live.getWatchingList(liveId);
+  if (watchingResult.success) {
+    console.log('观众数量:', watchingResult.data.length);
+  }
+}
+```
+
 ```
 
 ## 👤 用户信息
