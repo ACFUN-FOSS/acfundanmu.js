@@ -5,8 +5,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc && npm run copy:proto",
-    "copy:proto": "mkdir -p dist/proto && cp src/proto/*.* dist/proto/ || (mkdir dist\\proto 2>nul & copy src\\proto\\*.* dist\\proto\\)",
+    "build": "tsc ; npm run copy:proto",
+    "copy:proto": "if not exist dist\\proto mkdir dist\\proto ; xcopy /Y /I src\\proto\\*.* dist\\proto\\",
     "dev": "ts-node src/index.ts",
     "start": "node dist/index.js",
     "test": "jest",
