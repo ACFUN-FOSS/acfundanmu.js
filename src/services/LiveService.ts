@@ -269,7 +269,15 @@ export class LiveService {
           const listResp = await this.getLiveList(page, 100);
           if (listResp.success && Array.isArray(listResp.data?.lives)) {
             const hit = listResp.data.lives.find((live: any) => live.liveId === liveId);
-            if (hit) authorId = hit.streamer?.userId;
+            if (hit) {
+              // 频道列表结构中无 streamer 字段，使用用户信息字段近似推断
+              const name = (hit as any).streamerName || '';
+              // 若无法从列表结构获取 userId，则回退到热门列表再次检查
+              const retryHot = await this.getHotLives('', 0, 100);
+              authorId = retryHot.success
+                ? retryHot.data?.lives?.find((lv: any) => lv.liveId === liveId)?.streamer?.userId
+                : undefined;
+            }
           }
         }
       }
