@@ -1431,7 +1431,7 @@ export class LiveService {
       const fullUrl = query ? `${url}&${query}` : url;
       
       // 处理封面文件
-      let requestBody: string | FormData = '';
+      let requestBody: any = '';
       let contentType = 'application/x-www-form-urlencoded';
       
       if (coverFile) {
