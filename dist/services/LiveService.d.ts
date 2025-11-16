@@ -30,7 +30,7 @@ export declare class LiveService {
     /**
      * 获取直播统计数据
      */
-    getLiveStatistics(liveId: string): Promise<ApiResponse<{
+    getLiveStatistics(userId: number): Promise<ApiResponse<{
         totalViewers: number;
         peakViewers: number;
         totalComments: number;
