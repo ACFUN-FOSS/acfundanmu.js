@@ -257,85 +257,54 @@ export class LiveService {
     revenue: number;
   }>> {
     try {
-      // 首先通过liveId获取主播的用户ID
-      // 由于A站API需要通过authorId获取直播信息，我们需要先获取主播ID
-      // 这里我们使用getHotLives获取直播列表，然后找到对应的liveId
-      const hotLivesResponse = await this.getHotLives();
-      
-      if (!hotLivesResponse.success) {
-        return {
-          success: false,
-          error: `获取直播列表失败: ${hotLivesResponse.error}`
-        };
-      }
-      
-      // 在直播列表中查找对应的liveId
-      const targetLive = hotLivesResponse.data?.lives?.find((live: any) => live.liveId === liveId);
-      
-      if (!targetLive) {
-        return {
-          success: false,
-          error: `未找到liveId为${liveId}的直播间`
-        };
-      }
-      
-      // 获取主播的用户ID - 使用streamer.userId
-      const authorId = targetLive.streamer?.userId || 0;
-      
+      // 优先从热门列表检索
+      const hotLivesResponse = await this.getHotLives('', 0, 100);
+      let authorId = hotLivesResponse.success
+        ? hotLivesResponse.data?.lives?.find((live: any) => live.liveId === liveId)?.streamer?.userId
+        : undefined;
+
+      // 若未命中，再从频道列表分页检索（最多前5页，每页100条）
       if (!authorId) {
-        return {
-          success: false,
-          error: `无法获取主播的用户ID`
-        };
+        for (let page = 1; page <= 5 && !authorId; page++) {
+          const listResp = await this.getLiveList(page, 100);
+          if (listResp.success && Array.isArray(listResp.data?.lives)) {
+            const hit = listResp.data.lives.find((live: any) => live.liveId === liveId);
+            if (hit) authorId = hit.streamer?.userId;
+          }
+        }
       }
-      
-      // 使用A站API获取直播信息
+
+      if (!authorId) {
+        return { success: false, error: `未找到liveId为${liveId}的直播间` };
+      }
+
+      // 直接按 authorId 获取直播信息
       const url = `https://live.acfun.cn/api/live/info?authorId=${authorId}`;
-      
-      // 设置请求头
       const headers = buildCommonHeaders();
       headers['Referer'] = 'https://live.acfun.cn/';
-      
-      // 直接使用HttpClient.get发送请求，绕过apiGet的验证
       const response = await this.httpClient.get<any>(url, { headers });
-      
       if (!response.success) {
-        return {
-          success: false,
-          error: response.error || '获取直播统计数据失败'
-        };
+        return { success: false, error: response.error || '获取直播统计数据失败' };
       }
 
       const data = response.data;
-      
-      // 检查API响应结果 - 根据A站API的实际响应结构处理
       if (!data || data.result !== 0) {
-        return {
-          success: false,
-          error: `获取直播统计数据失败: ${data?.error || 'API响应异常'}`
-        };
+        return { success: false, error: `获取直播统计数据失败: ${data?.error || 'API响应异常'}` };
       }
-      
-      // 解析直播统计数据
+
       const liveInfo = data.data || {};
       const liveStatistics = {
-        totalViewers: liveInfo.onlineCount || 0, // 在线观看人数
-        peakViewers: liveInfo.onlineCount || 0, // 峰值观看人数（暂时使用在线人数）
-        totalComments: 0, // 弹幕数量需要其他API获取
-        totalGifts: 0, // 礼物数量需要其他API获取
-        totalLikes: liveInfo.likeCount || 0, // 点赞总数
-        revenue: 0 // 收入需要其他API获取
+        totalViewers: liveInfo.onlineCount || 0,
+        peakViewers: liveInfo.onlineCount || 0,
+        totalComments: 0,
+        totalGifts: 0,
+        totalLikes: liveInfo.likeCount || 0,
+        revenue: 0
       };
 
-      return {
-        success: true,
-        data: liveStatistics
-      };
+      return { success: true, data: liveStatistics };
     } catch (error) {
-      return {
-        success: false,
-        error: `获取直播统计数据失败: ${error instanceof Error ? error.message : String(error)}`
-      };
+      return { success: false, error: `获取直播统计数据失败: ${error instanceof Error ? error.message : String(error)}` };
     }
   }
 
