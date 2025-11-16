@@ -779,13 +779,13 @@ class LiveService {
             const formData = new URLSearchParams();
             // 构建完整的Cookie头
             const cookieHeader = (0, ApiUtils_1.buildCookieString)(tokenInfo.cookies, tokenInfo.deviceID);
-            // 使用apiPost发送请求
-            const response = await (0, ApiUtils_1.apiPost)(this.httpClient, url, formData.toString(), {
+            // 使用apiPost发送请求（正确参数顺序，期望码为1）
+            const response = await (0, ApiUtils_1.apiPost)(this.httpClient, url, '获取直播流状态', formData.toString(), {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'Cookie': cookieHeader
                 }
-            }, '获取直播流状态');
+            }, 1);
             if (!response.success) {
                 return response;
             }
@@ -999,7 +999,6 @@ class LiveService {
             }
             // 构建完整的Cookie头
             const cookieHeader = (0, ApiUtils_1.buildCookieString)(tokenInfo.cookies, tokenInfo.deviceID);
-            // 使用apiPost发送请求
             let response;
             if (contentType.startsWith('multipart/form-data')) {
                 response = await this.httpClient.post(fullUrl, requestBody, {
@@ -1011,13 +1010,13 @@ class LiveService {
                 });
             }
             else {
-                response = await (0, ApiUtils_1.apiPost)(this.httpClient, fullUrl, requestBody, {
+                response = await (0, ApiUtils_1.apiPost)(this.httpClient, fullUrl, '开始直播', requestBody, {
                     headers: {
                         'Content-Type': contentType,
                         'Cookie': cookieHeader,
                         'Referer': 'https://live.acfun.cn/'
                     }
-                }, '开始直播');
+                }, 1);
             }
             if (!response.success) {
                 return response;
@@ -1069,12 +1068,11 @@ class LiveService {
             // 根据source目录中的逻辑，需要传递form参数
             const formData = new URLSearchParams();
             formData.append('liveId', liveId);
-            // 使用apiPost发送请求
-            const response = await (0, ApiUtils_1.apiPost)(this.httpClient, url, formData.toString(), {
+            const response = await (0, ApiUtils_1.apiPost)(this.httpClient, url, '停止直播', formData.toString(), {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }
-            }, '停止直播');
+            }, 1);
             if (!response.success) {
                 return response;
             }
