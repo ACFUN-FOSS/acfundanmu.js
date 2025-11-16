@@ -5,8 +5,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc ; npm run copy:proto",
-    "copy:proto": "if not exist dist\\proto mkdir dist\\proto ; xcopy /Y /I src\\proto\\*.* dist\\proto\\",
+    "build": "tsc",
+    "postbuild": "node scripts/copyProto.js",
     "dev": "ts-node src/index.ts",
     "start": "node dist/index.js",
     "test": "jest",
