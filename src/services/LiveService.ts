@@ -262,9 +262,10 @@ export class LiveService {
       // 优先从热门列表检索
       if (!resolvedAuthorId) {
         const hotLivesResponse = await this.getHotLives('', 0, 100);
-        resolvedAuthorId = hotLivesResponse.success
-          ? hotLivesResponse.data?.lives?.find((live: any) => live.liveId === liveId)?.streamer?.userId
+        const hotHit = hotLivesResponse.success
+          ? hotLivesResponse.data?.lives?.find((live: any) => live.liveId === liveId)
           : undefined;
+        resolvedAuthorId = hotHit && hotHit.streamer ? Number(hotHit.streamer.userId) : undefined;
       }
 
       // 若未命中，再从频道列表分页检索（最多前5页，每页100条）
@@ -278,9 +279,10 @@ export class LiveService {
               const name = (hit as any).streamerName || '';
               // 若无法从列表结构获取 userId，则回退到热门列表再次检查
               const retryHot = await this.getHotLives('', 0, 100);
-              resolvedAuthorId = retryHot.success
-                ? retryHot.data?.lives?.find((lv: any) => lv.liveId === liveId)?.streamer?.userId
+              const retryHit = retryHot.success
+                ? retryHot.data?.lives?.find((lv: any) => lv.liveId === liveId)
                 : undefined;
+              resolvedAuthorId = retryHit && retryHit.streamer ? Number(retryHit.streamer.userId) : undefined;
             }
           }
         }
