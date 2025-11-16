@@ -17,15 +17,9 @@ describe('LiveService.getLiveStatistics', () => {
     api.setAuthToken(token);
 
     const uid = 214844;
-    const liveInfo = await api.live.getUserLiveInfo(uid);
-    if (!liveInfo.success || !liveInfo.data || !liveInfo.data.liveID) {
-      throw new Error('未获取到该用户的 liveId');
-    }
+    const resp = await api.live.getLiveStatistics(uid);
 
-    const liveId = liveInfo.data.liveID;
-    const resp = await api.live.getLiveStatistics(liveId, uid);
-
-    const params = { liveId, uid };
+    const params = { uid };
     const response = { status: resp.success ? 200 : 500, data: resp.data || resp.error };
     console.log('请求参数:', params);
     console.log('响应状态:', response.status);
