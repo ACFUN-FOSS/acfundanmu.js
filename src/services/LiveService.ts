@@ -1236,17 +1236,20 @@ export class LiveService {
       const queryString = queryParams.toString();
       const fullUrl = queryString ? `${url}&${queryString}` : url;
       
-      // 构建请求体 - 处理封面文件上传
       let requestBody: string = '';
       let contentType = 'application/x-www-form-urlencoded';
-      
+
       if (coverFile) {
-        // 如果有封面文件，需要构建FormData
-        // 由于Node.js环境限制，这里简化处理为URL编码参数
+        const isHttpUrl = /^https?:\/\//i.test(coverFile);
+        const isDataUri = /^data:image\/(png|jpe?g|gif|webp);base64,/i.test(coverFile) || /^[A-Za-z0-9+/=]+$/i.test(coverFile);
+
         const formData = new URLSearchParams();
-        formData.append('file', coverFile);
+        if (isHttpUrl || isDataUri) {
+          formData.append('file', coverFile);
+        } else {
+          formData.append('file', coverFile);
+        }
         requestBody = formData.toString();
-        contentType = 'application/x-www-form-urlencoded';
       }
 
       // 构建完整的Cookie头
