@@ -248,7 +248,7 @@ export class LiveService {
   /**
    * 获取直播统计数据
    */
-  public async getLiveStatistics(liveId: string): Promise<ApiResponse<{
+  public async getLiveStatistics(liveId: string, authorId?: number): Promise<ApiResponse<{
     totalViewers: number;
     peakViewers: number;
     totalComments: number;
@@ -257,14 +257,18 @@ export class LiveService {
     revenue: number;
   }>> {
     try {
+      // 若提供 authorId，直接使用
+      let resolvedAuthorId = authorId;
       // 优先从热门列表检索
-      const hotLivesResponse = await this.getHotLives('', 0, 100);
-      let authorId = hotLivesResponse.success
-        ? hotLivesResponse.data?.lives?.find((live: any) => live.liveId === liveId)?.streamer?.userId
-        : undefined;
+      if (!resolvedAuthorId) {
+        const hotLivesResponse = await this.getHotLives('', 0, 100);
+        resolvedAuthorId = hotLivesResponse.success
+          ? hotLivesResponse.data?.lives?.find((live: any) => live.liveId === liveId)?.streamer?.userId
+          : undefined;
+      }
 
       // 若未命中，再从频道列表分页检索（最多前5页，每页100条）
-      if (!authorId) {
+      if (!resolvedAuthorId) {
         for (let page = 1; page <= 5 && !authorId; page++) {
           const listResp = await this.getLiveList(page, 100);
           if (listResp.success && Array.isArray(listResp.data?.lives)) {
@@ -274,7 +278,7 @@ export class LiveService {
               const name = (hit as any).streamerName || '';
               // 若无法从列表结构获取 userId，则回退到热门列表再次检查
               const retryHot = await this.getHotLives('', 0, 100);
-              authorId = retryHot.success
+              resolvedAuthorId = retryHot.success
                 ? retryHot.data?.lives?.find((lv: any) => lv.liveId === liveId)?.streamer?.userId
                 : undefined;
             }
@@ -282,12 +286,12 @@ export class LiveService {
         }
       }
 
-      if (!authorId) {
+      if (!resolvedAuthorId) {
         return { success: false, error: `未找到liveId为${liveId}的直播间` };
       }
 
       // 直接按 authorId 获取直播信息
-      const url = `https://live.acfun.cn/api/live/info?authorId=${authorId}`;
+      const url = `https://live.acfun.cn/api/live/info?authorId=${resolvedAuthorId}`;
       const headers = buildCommonHeaders();
       headers['Referer'] = 'https://live.acfun.cn/';
       const response = await this.httpClient.get<any>(url, { headers });

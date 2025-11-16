@@ -23,7 +23,7 @@ describe('LiveService.getLiveStatistics', () => {
     }
 
     const liveId = liveInfo.data.liveID;
-    const resp = await api.live.getLiveStatistics(liveId);
+    const resp = await api.live.getLiveStatistics(liveId, uid);
 
     const params = { liveId, uid };
     const response = { status: resp.success ? 200 : 500, data: resp.data || resp.error };
