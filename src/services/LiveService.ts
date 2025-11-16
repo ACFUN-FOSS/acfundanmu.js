@@ -1236,33 +1236,75 @@ export class LiveService {
       const queryString = queryParams.toString();
       const fullUrl = queryString ? `${url}&${queryString}` : url;
       
-      let requestBody: string = '';
+      let requestBody: any = '';
       let contentType = 'application/x-www-form-urlencoded';
 
       if (coverFile) {
-        const isHttpUrl = /^https?:\/\//i.test(coverFile);
-        const isDataUri = /^data:image\/(png|jpe?g|gif|webp);base64,/i.test(coverFile) || /^[A-Za-z0-9+/=]+$/i.test(coverFile);
+        const urlMatch = /^https?:\/\//i.test(coverFile);
+        const dataUriMatch = /^data:image\/(png|jpe?g|gif|webp);base64,/i.test(coverFile);
+        const pureBase64Match = !dataUriMatch && /^[A-Za-z0-9+/=]+$/i.test(coverFile);
 
-        const formData = new URLSearchParams();
-        if (isHttpUrl || isDataUri) {
-          formData.append('file', coverFile);
+        let filename = 'cover.bin';
+        let bytes: Buffer | null = null;
+        if (urlMatch) {
+          try {
+            const u = new URL(coverFile);
+            const name = u.pathname.split('/').filter(Boolean).pop();
+            if (name) filename = name;
+          } catch {}
+          const resp = await this.httpClient.get<any>(coverFile, { responseType: 'arraybuffer' } as any);
+          if (!resp.success || !resp.data) {
+            return { success: false, error: '封面下载失败' };
+          }
+          bytes = Buffer.from(resp.data);
+        } else if (dataUriMatch) {
+          const comma = coverFile.indexOf(',');
+          const meta = coverFile.substring(0, comma);
+          const body = coverFile.substring(comma + 1);
+          if (/image\/png/i.test(meta)) filename = 'cover.png';
+          else if (/image\/jpe?g/i.test(meta)) filename = 'cover.jpg';
+          else if (/image\/gif/i.test(meta)) filename = 'cover.gif';
+          else if (/image\/webp/i.test(meta)) filename = 'cover.webp';
+          bytes = Buffer.from(body, 'base64');
+        } else if (pureBase64Match) {
+          bytes = Buffer.from(coverFile, 'base64');
         } else {
-          formData.append('file', coverFile);
+          return { success: false, error: '封面仅支持互联网图片URL或Base64' };
         }
-        requestBody = formData.toString();
+
+        if (!bytes) {
+          return { success: false, error: '封面处理失败' };
+        }
+
+        const boundary = `----acfunlive_${Date.now()}`;
+        const head = Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="cover"; filename="${filename}"\r\nContent-Type: application/octet-stream\r\n\r\n`);
+        const tail = Buffer.from(`\r\n--${boundary}--\r\n`);
+        requestBody = Buffer.concat([head, bytes, tail]);
+        contentType = `multipart/form-data; boundary=${boundary}`;
       }
 
       // 构建完整的Cookie头
       const cookieHeader = buildCookieString(tokenInfo.cookies, tokenInfo.deviceID);
 
       // 使用apiPost发送请求
-      const response = await apiPost<any>(this.httpClient, fullUrl, requestBody, {
-        headers: {
-          'Content-Type': contentType,
-          'Cookie': cookieHeader,
-          'Referer': 'https://live.acfun.cn/'
-        }
-      }, '开始直播');
+      let response: ApiResponse<any>;
+      if (contentType.startsWith('multipart/form-data')) {
+        response = await this.httpClient.post<any>(fullUrl, requestBody, {
+          headers: {
+            'Content-Type': contentType,
+            'Cookie': cookieHeader,
+            'Referer': 'https://live.acfun.cn/'
+          }
+        });
+      } else {
+        response = await apiPost<any>(this.httpClient, fullUrl, requestBody, {
+          headers: {
+            'Content-Type': contentType,
+            'Cookie': cookieHeader,
+            'Referer': 'https://live.acfun.cn/'
+          }
+        }, '开始直播');
+      }
       
       if (!response.success) {
         return response as ApiResponse<any>;
@@ -1393,31 +1435,49 @@ export class LiveService {
       let contentType = 'application/x-www-form-urlencoded';
       
       if (coverFile) {
-        // 如果有封面文件，使用FormData上传
-        const formData = new FormData();
-        
-        // 判断是本地文件还是网络链接
-        try {
-          const urlObj = new URL(coverFile);
-          if (urlObj.protocol === 'http:' || urlObj.protocol === 'https:') {
-            // 网络链接，直接作为参数传递
-            formData.append('cover', coverFile);
-          } else {
-            // 本地文件，需要读取文件内容
-            // 这里简化处理，实际应该读取文件并上传
-            formData.append('cover', coverFile);
+        const urlMatch = /^https?:\/\//i.test(coverFile);
+        const dataUriMatch = /^data:image\/(png|jpe?g|gif|webp);base64,/i.test(coverFile);
+        const pureBase64Match = !dataUriMatch && /^[A-Za-z0-9+/=]+$/i.test(coverFile);
+
+        let filename = 'cover.bin';
+        let bytes: Buffer | null = null;
+        if (urlMatch) {
+          try {
+            const u = new URL(coverFile);
+            const name = u.pathname.split('/').filter(Boolean).pop();
+            if (name) filename = name;
+          } catch {}
+          const resp = await this.httpClient.get<any>(coverFile, { responseType: 'arraybuffer' } as any);
+          if (!resp.success || !resp.data) {
+            return { success: false, error: '封面下载失败' };
           }
-        } catch {
-          // 不是有效的URL，当作本地文件处理
-          formData.append('cover', coverFile);
+          bytes = Buffer.from(resp.data);
+        } else if (dataUriMatch) {
+          const comma = coverFile.indexOf(',');
+          const meta = coverFile.substring(0, comma);
+          const body = coverFile.substring(comma + 1);
+          if (/image\/png/i.test(meta)) filename = 'cover.png';
+          else if (/image\/jpe?g/i.test(meta)) filename = 'cover.jpg';
+          else if (/image\/gif/i.test(meta)) filename = 'cover.gif';
+          else if (/image\/webp/i.test(meta)) filename = 'cover.webp';
+          bytes = Buffer.from(body, 'base64');
+        } else if (pureBase64Match) {
+          bytes = Buffer.from(coverFile, 'base64');
+        } else {
+          return { success: false, error: '封面仅支持互联网图片URL或Base64' };
         }
-        
-        // 对于FormData，不需要设置Content-Type，浏览器会自动设置
-        requestBody = formData as any;
-        contentType = 'multipart/form-data';
+
+        if (!bytes) {
+          return { success: false, error: '封面处理失败' };
+        }
+
+        const boundary = `----acfunlive_${Date.now()}`;
+        const head = Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="cover"; filename="${filename}"\r\nContent-Type: application/octet-stream\r\n\r\n`);
+        const tail = Buffer.from(`\r\n--${boundary}--\r\n`);
+        requestBody = Buffer.concat([head, bytes, tail]);
+        contentType = `multipart/form-data; boundary=${boundary}`;
       }
       
-      // 使用httpClient.post直接发送请求
       const response = await this.httpClient.post<any>(fullUrl, requestBody, {
         headers: {
           'Content-Type': contentType
