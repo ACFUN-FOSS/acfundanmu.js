@@ -365,3 +365,60 @@ interface WatchingUser {
   customData: string;           // 额外信息（JSON字符串）
 }
 ```
+
+### DisplayInfo - 直播间显示信息
+
+```typescript
+interface DisplayInfo {
+  watchingCount: string;
+  likeCount: string;
+  likeDelta: number;
+}
+```
+
+### TopUser - 礼物榜前三
+
+```typescript
+type TopUser = WatchingUser;
+```
+
+### Redpack - 红包信息
+
+```typescript
+enum RedpackDisplayStatus {
+  Appear = 0,
+  TokenAvailable = 1,
+  CanGrab = 2
+}
+
+interface Redpack {
+  userInfo: UserInfo;
+  displayStatus: RedpackDisplayStatus;
+  grabBeginTime: number;
+  getTokenLatestTime: number;
+  redpackID: string;
+  redpackBizUnit: string;
+  redpackAmount: number;
+  settleBeginTime: number;
+}
+```
+
+### Chat 信号
+
+```typescript
+enum ChatMediaType {
+  Unknown = 0,
+  Audio = 1,
+  Video = 2
+}
+
+enum ChatEndType {
+  Unknown = 0,
+  Normal = 1
+}
+
+interface ChatCall { chatID: string; liveID: string; callTime: number }
+interface ChatAccept { chatID: string; mediaType: ChatMediaType; signalInfo: string }
+interface ChatReady { chatID: string; guest: UserInfo; mediaType: ChatMediaType }
+interface ChatEnd { chatID: string; endType: ChatEndType }
+```

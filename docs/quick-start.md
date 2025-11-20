@@ -95,22 +95,21 @@ await checkLogin();
 const liverUID = '123456';  // 主播的 UID
 
 const result = await api.danmu.startDanmu(liverUID, (event) => {
-  // 处理不同类型的弹幕事件
-  
-  // 评论弹幕
-  if ('content' in event) {
-    console.log(`[弹幕] ${event.danmuInfo.userInfo.nickname}: ${event.content}`);
-  }
-  
-  // 礼物消息
-  else if ('giftDetail' in event) {
-    const gift = event.giftDetail;
-    console.log(`[礼物] ${event.danmuInfo.userInfo.nickname} 送出 ${gift.giftName} x${event.count}`);
-  }
-  
-  // 用户进房
-  else if ('userInfo' in event && !('content' in event)) {
-    console.log(`[进房] ${event.userInfo.nickname} 进入直播间`);
+  if ('danmuInfo' in event) {
+    if ('content' in event) {
+      console.log(`[弹幕] ${event.danmuInfo.userInfo.nickname}: ${event.content}`);
+    } else if ('giftDetail' in event) {
+      const gift = event.giftDetail;
+      console.log(`[礼物] ${event.danmuInfo.userInfo.nickname} 送出 ${gift.giftName} x${event.count}`);
+    } else if ('userInfo' in event && !('content' in event)) {
+      console.log(`[进房] ${event.userInfo.nickname} 进入直播间`);
+    }
+  } else if (event && event.type) {
+    if (event.type === 'end') {
+      console.log('直播结束，自动关闭会话');
+    } else if (event.type === 'displayInfo') {
+      console.log('在线/点赞:', event.data.watchingCount, event.data.likeCount, '+', event.data.likeDelta);
+    }
   }
 });
 

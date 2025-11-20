@@ -99,16 +99,31 @@ interface AuthResponse {
 
 ### startDanmu - 启动弹幕
 
-连接直播间并开始接收弹幕消息。
+连接直播间并开始接收弹幕、状态与通知信号。统一使用一个回调函数。
 
 **参数：**
 - `liverUID: string` - 主播UID
-- `callback: (event: DanmuMessage) => void` - 弹幕回调函数
+- `callback: (event: any) => void` - 统一回调函数
 
 **响应：**
 ```typescript
 { sessionId: string }
 ```
+
+**回调事件说明：**
+- 行为事件（包含 `danmuInfo`）：`Comment`、`Like`、`EnterRoom`、`FollowAuthor`、`ThrowBanana`、`Gift`、`RichText`、`JoinClub`、`ShareLive`
+- 状态事件（形如 `{ type, data }`）：
+  - `{ type: 'bananaCount', data: number }`
+  - `{ type: 'displayInfo', data: { watchingCount: string; likeCount: string; likeDelta: number } }`
+  - `{ type: 'topUsers', data: TopUser[] }`
+  - `{ type: 'recentComment', data: Comment[] }`（逐条派发）
+  - `{ type: 'redpackList', data: Redpack[] }`
+  - `{ type: 'chatCall' | 'chatAccept' | 'chatReady' | 'chatEnd', data: ... }`
+- 通知事件（形如 `{ type, data }`）：
+  - `{ type: 'kickedOut', data: string }`
+  - `{ type: 'violationAlert', data: string }`
+  - `{ type: 'managerState', data: number }`
+- 结束事件：`{ type: 'end' }`（当直播关闭或被封禁时派发，并自动关闭会话）
 
 ### stopDanmu - 停止弹幕
 
@@ -181,7 +196,7 @@ StreamUrl {
 
 **参数：**
 - `title: string` - 直播标题
-- `coverFile: string` - 封面文件
+- `coverFile: string` - 封面（支持互联网图片URL或Base64数据URI/纯Base64）
 - `streamName: string` - 流名称
 - `portrait: boolean` - 是否竖屏
 - `panoramic: boolean` - 是否全景

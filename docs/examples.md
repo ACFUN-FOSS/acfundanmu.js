@@ -17,10 +17,44 @@ async function monitorDanmu() {
 
   // 启动弹幕监控
   const result = await api.danmu.startDanmu('主播UID', (event) => {
-    if ('content' in event) {
-      console.log(`💬 ${event.danmuInfo.userInfo.nickname}: ${event.content}`);
-    } else if ('giftDetail' in event) {
-      console.log(`🎁 ${event.danmuInfo.userInfo.nickname} 送出 ${event.giftDetail.giftName}`);
+    if ('danmuInfo' in event) {
+      if ('content' in event) {
+        console.log(`💬 ${event.danmuInfo.userInfo.nickname}: ${event.content}`);
+      } else if ('giftDetail' in event) {
+        console.log(`🎁 ${event.danmuInfo.userInfo.nickname} 送出 ${event.giftDetail.giftName}`);
+      }
+    } else if (event && event.type) {
+      switch (event.type) {
+        case 'displayInfo':
+          console.log('👀 在线:', event.data.watchingCount, '👍 点赞:', event.data.likeCount, '+', event.data.likeDelta);
+          break;
+        case 'topUsers':
+          console.log('🏆 礼物榜前三:', event.data.map((u: any) => u.userInfo.nickname).join(', '));
+          break;
+        case 'bananaCount':
+          console.log('🍌 香蕉总数:', event.data);
+          break;
+        case 'redpackList':
+          console.log('🧧 红包数量:', event.data.length);
+          break;
+        case 'chatCall':
+        case 'chatAccept':
+        case 'chatReady':
+        case 'chatEnd':
+          console.log('📞 Chat 信号:', event.type, event.data);
+          break;
+        case 'kickedOut':
+          console.warn('⚠️ 被踢出:', event.data);
+          break;
+        case 'violationAlert':
+          console.warn('🚨 直播警告:', event.data);
+          break;
+        case 'end':
+          console.log('⏹️ 直播结束，自动关闭会话');
+          break;
+        default:
+          break;
+      }
     }
   });
 
