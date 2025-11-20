@@ -253,6 +253,7 @@ export interface DanmuSession {
   ticketIndex: number;
   state: DanmuSessionState;
   callback: (event: DanmuMessage) => void;
+  signalCallback?: (event: SignalEvent) => void;
 }
 
 // 用户信息
@@ -417,6 +418,62 @@ export interface WatchingUser {
 
 // 礼物榜前三
 export type TopUser = WatchingUser;
+
+export interface SignalEvent {
+  type: string;
+  data: any;
+}
+
+export enum RedpackDisplayStatus {
+  Appear = 0,
+  TokenAvailable = 1,
+  CanGrab = 2
+}
+
+export interface Redpack {
+  userInfo: UserInfo;
+  displayStatus: RedpackDisplayStatus;
+  grabBeginTime: number;
+  getTokenLatestTime: number;
+  redpackID: string;
+  redpackBizUnit: string;
+  redpackAmount: number;
+  settleBeginTime: number;
+}
+
+export enum ChatMediaType {
+  Unknown = 0,
+  Audio = 1,
+  Video = 2
+}
+
+export enum ChatEndType {
+  Unknown = 0,
+  Normal = 1
+}
+
+export interface ChatCall {
+  chatID: string;
+  liveID: string;
+  callTime: number;
+}
+
+export interface ChatAccept {
+  chatID: string;
+  mediaType: ChatMediaType;
+  signalInfo: string;
+}
+
+export interface ChatReady {
+  chatID: string;
+  guest: UserInfo;
+  mediaType: ChatMediaType;
+}
+
+export interface ChatEnd {
+  chatID: string;
+  endType: ChatEndType;
+}
 
 // ========== 连接管理相关类型 ==========
 

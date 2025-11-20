@@ -461,3 +461,145 @@ export function parseActionSignal(actionSignalData: Buffer): DanmuMessage[] {
     return events;
   }
 }
+
+export function parseStateSignal(stateSignalData: Buffer): any[] {
+  const events: any[] = []
+  try {
+    const state = AcFunDanmu.ZtLiveScStateSignal.decode(stateSignalData)
+    if (!state.item) return events
+    for (const item of state.item) {
+      switch (item.signalType) {
+        case 'AcfunStateSignalDisplayInfo': {
+          const info = AcFunDanmu.AcfunStateSignalDisplayInfo.decode(item.payload as Uint8Array)
+          events.push({ type: 'bananaCount', data: Number(info.bananaCount || 0) })
+          break
+        }
+        case 'CommonStateSignalDisplayInfo': {
+          const info = AcFunDanmu.CommonStateSignalDisplayInfo.decode(item.payload as Uint8Array)
+          events.push({ type: 'displayInfo', data: { watchingCount: String(info.watchingCount || ''), likeCount: String(info.likeCount || ''), likeDelta: Number(info.likeDelta || 0) } })
+          break
+        }
+        case 'CommonStateSignalTopUsers': {
+          const top = AcFunDanmu.CommonStateSignalTopUsers.decode(item.payload as Uint8Array)
+          const users = (top.user || []).map(u => ({
+            userInfo: {
+              userID: Number(u.userInfo?.userId || 0),
+              nickname: String(u.userInfo?.nickname || u.userInfo?.name || ''),
+              avatar: String(u.userInfo?.avatar || ''),
+              medal: { uperID: Number(u.userInfo?.medal?.uperId || 0), userID: Number(u.userInfo?.medal?.userId || 0), clubName: String(u.userInfo?.medal?.clubName || ''), level: Number(u.userInfo?.medal?.level || 0) },
+              managerType: Number(u.userInfo?.managerType || 0)
+            },
+            anonymousUser: Boolean(u.anonymousUser),
+            displaySendAmount: String(u.displaySendAmount || ''),
+            customData: String(u.customWatchingListData || '')
+          }))
+          events.push({ type: 'topUsers', data: users })
+          break
+        }
+        case 'CommonStateSignalRecentComment': {
+          const rc = AcFunDanmu.CommonStateSignalRecentComment.decode(item.payload as Uint8Array)
+          const list = (rc.comment || []).map(c => ({
+            sendTime: Number(c.sendTimeMs || 0),
+            userInfo: {
+              userID: Number(c.userInfo?.userId || 0),
+              nickname: String(c.userInfo?.nickname || c.userInfo?.name || ''),
+              avatar: String(c.userInfo?.avatar || ''),
+              medal: { uperID: Number(c.userInfo?.medal?.uperId || 0), userID: Number(c.userInfo?.medal?.userId || 0), clubName: String(c.userInfo?.medal?.clubName || ''), level: Number(c.userInfo?.medal?.level || 0) },
+              managerType: Number(c.userInfo?.managerType || 0)
+            },
+            content: String(c.content || '')
+          }))
+          events.push({ type: 'recentComment', data: list })
+          break
+        }
+        case 'CommonStateSignalCurrentRedpackList': {
+          const rl = AcFunDanmu.CommonStateSignalCurrentRedpackList.decode(item.payload as Uint8Array)
+          const list = (rl.redpacks || []).map(r => ({
+            userInfo: {
+              userID: Number(r.sender?.userId || 0),
+              nickname: String(r.sender?.name || ''),
+              avatar: '',
+              medal: { uperID: 0, userID: 0, clubName: '', level: 0 },
+              managerType: 0
+            },
+            displayStatus: Number(r.displayStatus || 0),
+            grabBeginTime: Number(r.grabBeginTimeMs || 0),
+            getTokenLatestTime: Number(r.getTokenLatestTimeMs || 0),
+            redpackID: String(r.redPackId || ''),
+            redpackBizUnit: String(r.redpackBizUnit || ''),
+            redpackAmount: Number(r.redpackAmount || 0),
+            settleBeginTime: Number(r.settleBeginTime || 0)
+          }))
+          events.push({ type: 'redpackList', data: list })
+          break
+        }
+        case 'CommonStateSignalChatCall': {
+          const cc = AcFunDanmu.CommonStateSignalChatCall.decode(item.payload as Uint8Array)
+          events.push({ type: 'chatCall', data: { chatID: String(cc.chatId || ''), liveID: String(cc.liveId || ''), callTime: Number(cc.callTimestampMs || 0) } })
+          break
+        }
+        case 'CommonStateSignalChatAccept': {
+          const ca = AcFunDanmu.CommonStateSignalChatAccept.decode(item.payload as Uint8Array)
+          events.push({ type: 'chatAccept', data: { chatID: String(ca.chatId || ''), mediaType: Number(ca.mediaType || 0), signalInfo: String(ca.aryaSignalInfo || '') } })
+          break
+        }
+        case 'CommonStateSignalChatReady': {
+          const cr = AcFunDanmu.CommonStateSignalChatReady.decode(item.payload as Uint8Array)
+          const guest = {
+            userID: Number(cr.guestUserInfo?.user?.userId || 0),
+            nickname: String(cr.guestUserInfo?.user?.name || cr.guestUserInfo?.user?.nickname || ''),
+            avatar: '',
+            medal: { uperID: 0, userID: 0, clubName: '', level: 0 },
+            managerType: 0
+          }
+          events.push({ type: 'chatReady', data: { chatID: String(cr.chatId || ''), guest, mediaType: Number(cr.mediaType || 0) } })
+          break
+        }
+        case 'CommonStateSignalChatEnd': {
+          const ce = AcFunDanmu.CommonStateSignalChatEnd.decode(item.payload as Uint8Array)
+          events.push({ type: 'chatEnd', data: { chatID: String(ce.chatId || ''), endType: Number(ce.endType || 0) } })
+          break
+        }
+        default: {
+          break
+        }
+      }
+    }
+    return events
+  } catch {
+    return events
+  }
+}
+
+export function parseNotifySignal(notifySignalData: Buffer): any[] {
+  const events: any[] = []
+  try {
+    const notify = AcFunDanmu.ZtLiveScNotifySignal.decode(notifySignalData)
+    if (!notify.item) return events
+    for (const item of notify.item) {
+      switch (item.signalType) {
+        case 'CommonNotifySignalKickedOut': {
+          const ko = AcFunDanmu.CommonNotifySignalKickedOut.decode(item.payload as Uint8Array)
+          events.push({ type: 'kickedOut', data: String(ko.reason || '') })
+          break
+        }
+        case 'CommonNotifySignalViolationAlert': {
+          const va = AcFunDanmu.CommonNotifySignalViolationAlert.decode(item.payload as Uint8Array)
+          events.push({ type: 'violationAlert', data: String(va.violationContent || '') })
+          break
+        }
+        case 'CommonNotifySignalLiveManagerState': {
+          const ms = AcFunDanmu.CommonNotifySignalLiveManagerState.decode(item.payload as Uint8Array)
+          events.push({ type: 'managerState', data: Number(ms.state || 0) })
+          break
+        }
+        default: {
+          break
+        }
+      }
+    }
+    return events
+  } catch {
+    return events
+  }
+}
