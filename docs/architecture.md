@@ -104,6 +104,11 @@ Protobuf 工具：
 ### 直播流程
 ```
 检查权限 -> 获取推流地址 -> 配置OBS -> 推流 -> 检测推流 -> 开播
+
+封面上传：
+- 支持互联网图片URL与 Base64（数据URI/纯Base64）
+- 以 `multipart/form-data` 的二进制方式上传，字段名 `cover`
+- 位置：`src/services/LiveService.ts:1239-1283`（开播）、`src/services/LiveService.ts:1412-1499`（更改封面）
 ```
 
 ### 房管管理流程
@@ -219,3 +224,28 @@ Protobuf 工具：
 - 防止越权访问
 
 详细的数据模型请参阅 [数据模型文档](./data-models.md)。
+#### 事件模型与派发
+
+- 统一回调：行为事件（含 `danmuInfo`）与状态/通知/结束事件统一通过一个回调派发
+- 行为事件：`Comment`、`Like`、`EnterRoom`、`FollowAuthor`、`ThrowBanana`、`Gift`、`RichText`、`JoinClub`、`ShareLive`
+- 状态事件：`bananaCount`、`displayInfo`、`topUsers`、`recentComment`、`redpackList`、`chatCall/Accept/Ready/End`
+- 通知事件：`kickedOut`、`violationAlert`、`managerState`
+- 结束事件：`end`（收到 `ZtLiveScStatusChanged` 的 `LIVE_CLOSED/LIVE_BANNED` 时派发，并关闭会话）
+
+实现位置：
+- 解析：`src/core/EventParser.ts:465-587`
+- 派发：`src/services/DanmuService.ts:1148-1189`
+- 结束：`src/services/DanmuService.ts:1172-1180`
+
+#### 信号 → 事件 映射简表
+
+- `AcfunStateSignalDisplayInfo` → `bananaCount:number`
+- `CommonStateSignalDisplayInfo` → `displayInfo: { watchingCount, likeCount, likeDelta }`
+- `CommonStateSignalTopUsers` → `topUsers: TopUser[]`
+- `CommonStateSignalRecentComment` → `recentComment: Comment[]`
+- `CommonStateSignalCurrentRedpackList` → `redpackList: Redpack[]`
+- `CommonStateSignalChatCall/Accept/Ready/End` → `chat*`
+- `CommonNotifySignalKickedOut` → `kickedOut:string`
+- `CommonNotifySignalViolationAlert` → `violationAlert:string`
+- `CommonNotifySignalLiveManagerState` → `managerState:number`
+- `ZtLiveScStatusChanged(LIVE_CLOSED/LIVE_BANNED)` → `end`

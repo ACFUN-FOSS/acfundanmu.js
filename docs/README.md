@@ -92,12 +92,20 @@ while (true) {
   await new Promise(resolve => setTimeout(resolve, 2000));
 }
 
-// 启动弹幕监控
+// 启动弹幕监控（统一回调：行为/状态/通知/结束）
 const danmuResult = await api.danmu.startDanmu('主播UID', (event) => {
-  if ('content' in event) {
-    console.log('收到弹幕:', event.content);
-  } else if ('giftDetail' in event) {
-    console.log('收到礼物:', event.giftDetail.giftName);
+  if ('danmuInfo' in event) {
+    if ('content' in event) {
+      console.log('收到弹幕:', event.content);
+    } else if ('giftDetail' in event) {
+      console.log('收到礼物:', event.giftDetail.giftName);
+    }
+  } else if (event && event.type) {
+    if (event.type === 'end') {
+      console.log('直播结束，自动关闭会话');
+    } else if (event.type === 'displayInfo') {
+      console.log('在线/点赞:', event.data.watchingCount, event.data.likeCount, '+', event.data.likeDelta);
+    }
   }
 });
 
@@ -236,3 +244,10 @@ interface ApiResponse<T> {
 ---
 
 **Happy Coding! 🎉**
+## 🖼️ 封面上传说明
+
+- 开播与更改封面均支持两种输入：
+  - 互联网图片 URL（`http/https`）
+  - Base64（数据URI：`data:image/png;base64,...` 或纯 Base64 字符串）
+- 上传方式：`multipart/form-data` 的二进制上传，字段名 `cover`
+- 位置：`src/services/LiveService.ts`（开播与更新封面）
