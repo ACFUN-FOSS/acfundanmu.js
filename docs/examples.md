@@ -34,9 +34,6 @@ async function monitorDanmu() {
         case 'bananaCount':
           console.log('🍌 香蕉总数:', event.data);
           break;
-        case 'redpackList':
-          console.log('🧧 红包数量:', event.data.length);
-          break;
         case 'chatCall':
         case 'chatAccept':
         case 'chatReady':

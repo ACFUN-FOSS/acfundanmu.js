@@ -117,7 +117,6 @@ interface AuthResponse {
   - `{ type: 'displayInfo', data: { watchingCount: string; likeCount: string; likeDelta: number } }`
   - `{ type: 'topUsers', data: TopUser[] }`
   - `{ type: 'recentComment', data: Comment[] }`（逐条派发）
-  - `{ type: 'redpackList', data: Redpack[] }`
   - `{ type: 'chatCall' | 'chatAccept' | 'chatReady' | 'chatEnd', data: ... }`
 - 通知事件（形如 `{ type, data }`）：
   - `{ type: 'kickedOut', data: string }`
@@ -136,7 +135,6 @@ interface Gift { giftDetail: GiftDetail; count: number; combo: number; value: nu
 ```typescript
 interface DisplayInfo { watchingCount: string; likeCount: string; likeDelta: number }
 type TopUser = WatchingUser
-interface Redpack { userInfo: UserInfo; displayStatus: number; grabBeginTime: number; getTokenLatestTime: number; redpackID: string; redpackBizUnit: string; redpackAmount: number; settleBeginTime: number }
 interface ChatCall { chatID: string; liveID: string; callTime: number }
 interface ChatAccept { chatID: string; mediaType: number; signalInfo: string }
 interface ChatReady { chatID: string; guest: UserInfo; mediaType: number }

@@ -500,27 +500,6 @@ export function parseStateSignal(stateSignalData: Buffer): any[] {
           events.push({ type: 'recentComment', data: list })
           break
         }
-        case 'CommonStateSignalCurrentRedpackList': {
-          const rl = AcFunDanmu.CommonStateSignalCurrentRedpackList.decode(item.payload as Uint8Array)
-          const list = (rl.redpacks || []).map(r => ({
-            userInfo: {
-              userID: Number(r.sender?.userId || 0),
-              nickname: String(r.sender?.name || ''),
-              avatar: '',
-              medal: { uperID: 0, userID: 0, clubName: '', level: 0 },
-              managerType: 0
-            },
-            displayStatus: Number(r.displayStatus || 0),
-            grabBeginTime: Number(r.grabBeginTimeMs || 0),
-            getTokenLatestTime: Number(r.getTokenLatestTimeMs || 0),
-            redpackID: String(r.redPackId || ''),
-            redpackBizUnit: String(r.redpackBizUnit || ''),
-            redpackAmount: Number(r.redpackAmount || 0),
-            settleBeginTime: Number(r.settleBeginTime || 0)
-          }))
-          events.push({ type: 'redpackList', data: list })
-          break
-        }
         case 'CommonStateSignalChatCall': {
           const cc = AcFunDanmu.CommonStateSignalChatCall.decode(item.payload as Uint8Array)
           events.push({ type: 'chatCall', data: { chatID: String(cc.chatId || ''), liveID: String(cc.liveId || ''), callTime: Number(cc.callTimestampMs || 0) } })

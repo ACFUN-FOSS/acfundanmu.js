@@ -539,26 +539,6 @@ interface DisplayInfo {
 type TopUser = WatchingUser;
 ```
 
-### Redpack - 红包信息
-
-```typescript
-enum RedpackDisplayStatus {
-  Appear = 0,
-  TokenAvailable = 1,
-  CanGrab = 2
-}
-
-interface Redpack {
-  userInfo: UserInfo;
-  displayStatus: RedpackDisplayStatus;
-  grabBeginTime: number;
-  getTokenLatestTime: number;
-  redpackID: string;
-  redpackBizUnit: string;
-  redpackAmount: number;
-  settleBeginTime: number;
-}
-```
 
 ### Chat 信号
 

@@ -419,22 +419,7 @@ export interface WatchingUser {
 export type TopUser = WatchingUser;
 
 
-export enum RedpackDisplayStatus {
-  Appear = 0,
-  TokenAvailable = 1,
-  CanGrab = 2
-}
-
-export interface Redpack {
-  userInfo: UserInfo;
-  displayStatus: RedpackDisplayStatus;
-  grabBeginTime: number;
-  getTokenLatestTime: number;
-  redpackID: string;
-  redpackBizUnit: string;
-  redpackAmount: number;
-  settleBeginTime: number;
-}
+ 
 
 export enum ChatMediaType {
   Unknown = 0,
