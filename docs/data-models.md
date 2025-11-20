@@ -366,6 +366,163 @@ interface WatchingUser {
 }
 ```
 
+## 统一事件模型
+
+### 回调事件总览
+
+```typescript
+// 行为事件：包含 danmuInfo
+interface DanmuInfo {
+  sendTime: number;        // 毫秒级时间戳
+  userInfo: UserInfo;      // 触发事件的用户
+}
+
+// 统一回调：行为事件或状态/通知事件
+type CallbackEvent =
+  | (Comment & { danmuInfo: DanmuInfo })
+  | (Like & { danmuInfo: DanmuInfo })
+  | (EnterRoom & { danmuInfo: DanmuInfo })
+  | (FollowAuthor & { danmuInfo: DanmuInfo })
+  | (ThrowBanana & { danmuInfo: DanmuInfo })
+  | (Gift & { danmuInfo: DanmuInfo })
+  | (RichText & { danmuInfo: DanmuInfo })
+  | (JoinClub & { danmuInfo: DanmuInfo })
+  | (ShareLive & { danmuInfo: DanmuInfo })
+  | StateNotifyEvent
+  | EndEvent;
+
+// 状态/通知事件（无 danmuInfo）
+type StateNotifyEvent =
+  | { type: 'bananaCount'; data: number }
+  | { type: 'displayInfo'; data: DisplayInfo }
+  | { type: 'topUsers'; data: TopUser[] }
+  | { type: 'recentComment'; data: Comment[] }
+  | { type: 'redpackList'; data: Redpack[] }
+  | { type: 'chatCall'; data: ChatCall }
+  | { type: 'chatAccept'; data: ChatAccept }
+  | { type: 'chatReady'; data: ChatReady }
+  | { type: 'chatEnd'; data: ChatEnd }
+  | { type: 'kickedOut'; data: string }
+  | { type: 'violationAlert'; data: string }
+  | { type: 'managerState'; data: number };
+
+// 结束事件
+type EndEvent = { type: 'end' };
+```
+
+### 行为事件的 danmuInfo 结构
+
+```typescript
+interface DanmuInfo {
+  sendTime: number;    // 毫秒级 Unix 时间
+  userInfo: UserInfo;  // 用户信息（统一通过 parseUserInfo 构造）
+}
+```
+
+## 状态与通知事件详解
+
+### bananaCount（直播间收到香蕉总数）
+
+```typescript
+{ type: 'bananaCount', data: number }
+```
+
+来源：`AcfunStateSignalDisplayInfo`
+
+### displayInfo（在线观众与点赞）
+
+```typescript
+{ type: 'displayInfo', data: { watchingCount: string; likeCount: string; likeDelta: number } }
+```
+
+来源：`CommonStateSignalDisplayInfo`
+
+### topUsers（在线观众前三 / 礼物榜前三）
+
+```typescript
+{ type: 'topUsers', data: TopUser[] }
+```
+
+来源：`CommonStateSignalTopUsers`
+
+### recentComment（进房时显示的最近弹幕）
+
+```typescript
+{ type: 'recentComment', data: Comment[] }
+```
+
+来源：`CommonStateSignalRecentComment`（派发时逐条触达统一回调）
+
+### redpackList（红包列表）
+
+```typescript
+{ type: 'redpackList', data: Redpack[] }
+```
+
+来源：`CommonStateSignalCurrentRedpackList`
+
+### Chat 信号（连麦）
+
+```typescript
+{ type: 'chatCall', data: ChatCall }
+{ type: 'chatAccept', data: ChatAccept }
+{ type: 'chatReady', data: ChatReady }
+{ type: 'chatEnd', data: ChatEnd }
+```
+
+来源：`CommonStateSignalChatCall / Accept / Ready / End`
+
+### kickedOut（被踢出直播间）
+
+```typescript
+{ type: 'kickedOut', data: string }
+```
+
+来源：`CommonNotifySignalKickedOut`（data 为踢出理由）
+
+### violationAlert（直播警告）
+
+```typescript
+{ type: 'violationAlert', data: string }
+```
+
+来源：`CommonNotifySignalViolationAlert`（data 为警告内容）
+
+### managerState（直播管理员状态）
+
+```typescript
+{ type: 'managerState', data: number }
+```
+
+来源：`CommonNotifySignalLiveManagerState`
+
+### end（获取弹幕结束）
+
+```typescript
+{ type: 'end' }
+```
+
+来源：`ZtLiveScStatusChanged` 的 `LIVE_CLOSED / LIVE_BANNED`。收到后自动关闭会话并派发该事件。
+
+## 事件示例
+
+```json
+// 评论弹幕（行为事件）
+{
+  "danmuInfo": {
+    "sendTime": 1608379795363,
+    "userInfo": { "userID": 666609, "nickname": "用户", "avatar": "...", "medal": { "uperID": 0, "userID": 0, "clubName": "", "level": 0 }, "managerType": 0 }
+  },
+  "content": "哈哈哈哈.."
+}
+
+// 显示信息（状态事件）
+{ "type": "displayInfo", "data": { "watchingCount": "277", "likeCount": "2.5 万", "likeDelta": 2 } }
+
+// 结束事件
+{ "type": "end" }
+```
+
 ### DisplayInfo - 直播间显示信息
 
 ```typescript
