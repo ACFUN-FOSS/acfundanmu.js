@@ -979,8 +979,18 @@ class DanmuService {
      */
     handleStatusChanged(session, payload) {
         try {
-            console.log('[StatusChanged] 收到状态变更，长度:', payload.length);
-            // TODO: 解析状态变更
+            const status = acfun_1.AcFunDanmu.ZtLiveScStatusChanged.decode(payload);
+            const t = status.type;
+            if (t === acfun_1.AcFunDanmu.ZtLiveScStatusChanged.Type.LIVE_CLOSED ||
+                t === acfun_1.AcFunDanmu.ZtLiveScStatusChanged.Type.LIVE_BANNED) {
+                try {
+                    session.callback({ type: 'end' });
+                }
+                catch {
+                    this.sessionManager.incrementErrorCount(session.sessionId);
+                }
+                this.destroySession(session.sessionId);
+            }
         }
         catch (error) {
             console.error('处理状态变更失败:', error);
