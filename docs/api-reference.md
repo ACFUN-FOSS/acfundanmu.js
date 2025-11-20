@@ -127,8 +127,9 @@ interface AuthResponse {
 #### 行为事件结构
 ```typescript
 interface DanmuInfo { sendTime: number; userInfo: UserInfo }
-interface Comment { content: string; sendTime: number; userInfo: UserInfo }
-interface Gift { giftDetail: GiftDetail; count: number; combo: number; value: number; sendTime: number; userInfo: UserInfo }
+type ActionType = 'comment' | 'like' | 'enterRoom' | 'followAuthor' | 'throwBanana' | 'gift' | 'richText' | 'joinClub' | 'shareLive'
+interface Comment { actionType: ActionType; content: string; sendTime: number; userInfo: UserInfo }
+interface Gift { actionType: ActionType; giftDetail: GiftDetail; count: number; combo: number; value: number; sendTime: number; userInfo: UserInfo }
 ```
 
 #### 状态/通知事件结构

@@ -48,6 +48,7 @@ export function parseUserInfo(userInfoData: AcFunDanmu.IZtLiveUserInfo): UserInf
 export function parseComment(data: AcFunDanmu.ICommonActionSignalComment): any {
   const userInfo = parseUserInfo(data.userInfo || {});
   return {
+    actionType: 'comment',
     danmuInfo: {
       sendTime: Number(data.sendTimeMs || Date.now()),
       userInfo: {
@@ -68,6 +69,7 @@ export function parseComment(data: AcFunDanmu.ICommonActionSignalComment): any {
 export function parseLike(data: AcFunDanmu.ICommonActionSignalLike): any {
   const userInfo = parseUserInfo(data.userInfo || {});
   return {
+    actionType: 'like',
     danmuInfo: {
       sendTime: Number(data.sendTimeMs || Date.now()),
       userInfo: {
@@ -87,6 +89,7 @@ export function parseLike(data: AcFunDanmu.ICommonActionSignalLike): any {
 export function parseEnterRoom(data: AcFunDanmu.ICommonActionSignalUserEnterRoom): any {
   const userInfo = parseUserInfo(data.userInfo || {});
   return {
+    actionType: 'enterRoom',
     danmuInfo: {
       sendTime: Number(data.sendTimeMs || Date.now()),
       userInfo: {
@@ -106,6 +109,7 @@ export function parseEnterRoom(data: AcFunDanmu.ICommonActionSignalUserEnterRoom
 export function parseFollowAuthor(data: AcFunDanmu.ICommonActionSignalUserFollowAuthor): any {
   const userInfo = parseUserInfo(data.userInfo || {});
   return {
+    actionType: 'followAuthor',
     danmuInfo: {
       sendTime: Number(data.sendTimeMs || Date.now()),
       userInfo: {
@@ -124,6 +128,7 @@ export function parseFollowAuthor(data: AcFunDanmu.ICommonActionSignalUserFollow
  */
 export function parseThrowBanana(data: AcFunDanmu.IAcfunActionSignalThrowBanana): any {
   return {
+    actionType: 'throwBanana',
     danmuInfo: {
       sendTime: Number(data.sendTimeMs || Date.now()),
       userInfo: {
@@ -150,6 +155,7 @@ export function parseGift(data: AcFunDanmu.ICommonActionSignalGift, giftDetail?:
   const userInfo = parseUserInfo(data.userInfo || {});
   
   const gift: any = {
+    actionType: 'gift',
     danmuInfo: {
       sendTime: Number(data.sendTimeMs || Date.now()),
       userInfo: {
@@ -239,6 +245,7 @@ export function parseRichText(data: AcFunDanmu.ICommonActionSignalRichText): any
   });
 
   return {
+    actionType: 'richText',
     danmuInfo: {
       sendTime: Number(data.sendTimeMs || Date.now()),
       userInfo: {
@@ -271,6 +278,7 @@ export function parseJoinClub(data: AcFunDanmu.IAcfunActionSignalJoinClub): any 
   };
   
   return {
+    actionType: 'joinClub',
     danmuInfo: {
       sendTime: Number(data.joinTimeMs || Date.now()),
       userInfo: fansInfo
@@ -298,6 +306,7 @@ export function parseJoinClub(data: AcFunDanmu.IAcfunActionSignalJoinClub): any 
 export function parseShareLive(data: AcFunDanmu.ICommonActionSignalUserShareLive): any {
   const userInfo = parseUserInfo(data.userInfo || {});
   return {
+    actionType: 'shareLive',
     danmuInfo: {
       sendTime: Number(data.sendTimeMs || Date.now()),
       userInfo: {

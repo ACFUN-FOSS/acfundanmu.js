@@ -96,13 +96,13 @@ const liverUID = '123456';  // 主播的 UID
 
 const result = await api.danmu.startDanmu(liverUID, (event) => {
   if ('danmuInfo' in event) {
-    if ('content' in event) {
+    if (event.actionType === 'comment' || 'content' in event) {
       console.log(`[弹幕] ${event.danmuInfo.userInfo.nickname}: ${event.content}`);
-    } else if ('giftDetail' in event) {
+    } else if (event.actionType === 'gift' || 'giftDetail' in event) {
       const gift = event.giftDetail;
       console.log(`[礼物] ${event.danmuInfo.userInfo.nickname} 送出 ${gift.giftName} x${event.count}`);
-    } else if ('userInfo' in event && !('content' in event)) {
-      console.log(`[进房] ${event.userInfo.nickname} 进入直播间`);
+    } else if (event.actionType === 'enterRoom') {
+      console.log(`[进房] ${event.danmuInfo.userInfo.nickname} 进入直播间`);
     }
   } else if (event && event.type) {
     switch (event.type) {

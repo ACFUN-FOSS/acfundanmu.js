@@ -379,15 +379,15 @@ interface DanmuInfo {
 
 // 统一回调：行为事件或状态/通知事件
 type CallbackEvent =
-  | (Comment & { danmuInfo: DanmuInfo })
-  | (Like & { danmuInfo: DanmuInfo })
-  | (EnterRoom & { danmuInfo: DanmuInfo })
-  | (FollowAuthor & { danmuInfo: DanmuInfo })
-  | (ThrowBanana & { danmuInfo: DanmuInfo })
-  | (Gift & { danmuInfo: DanmuInfo })
-  | (RichText & { danmuInfo: DanmuInfo })
-  | (JoinClub & { danmuInfo: DanmuInfo })
-  | (ShareLive & { danmuInfo: DanmuInfo })
+  | (Comment & { danmuInfo: DanmuInfo; actionType: 'comment' })
+  | (Like & { danmuInfo: DanmuInfo; actionType: 'like' })
+  | (EnterRoom & { danmuInfo: DanmuInfo; actionType: 'enterRoom' })
+  | (FollowAuthor & { danmuInfo: DanmuInfo; actionType: 'followAuthor' })
+  | (ThrowBanana & { danmuInfo: DanmuInfo; actionType: 'throwBanana' })
+  | (Gift & { danmuInfo: DanmuInfo; actionType: 'gift' })
+  | (RichText & { danmuInfo: DanmuInfo; actionType: 'richText' })
+  | (JoinClub & { danmuInfo: DanmuInfo; actionType: 'joinClub' })
+  | (ShareLive & { danmuInfo: DanmuInfo; actionType: 'shareLive' })
   | StateNotifyEvent
   | EndEvent;
 
@@ -417,6 +417,9 @@ interface DanmuInfo {
   sendTime: number;    // 毫秒级 Unix 时间
   userInfo: UserInfo;  // 用户信息（统一通过 parseUserInfo 构造）
 }
+
+// 行为事件的 actionType 枚举
+type ActionType = 'comment' | 'like' | 'enterRoom' | 'followAuthor' | 'throwBanana' | 'gift' | 'richText' | 'joinClub' | 'shareLive'
 ```
 
 ## 状态与通知事件详解

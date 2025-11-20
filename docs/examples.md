@@ -18,10 +18,14 @@ async function monitorDanmu() {
   // 启动弹幕监控
   const result = await api.danmu.startDanmu('主播UID', (event) => {
     if ('danmuInfo' in event) {
-      if ('content' in event) {
+      if (event.actionType === 'comment' || 'content' in event) {
         console.log(`💬 ${event.danmuInfo.userInfo.nickname}: ${event.content}`);
-      } else if ('giftDetail' in event) {
+      } else if (event.actionType === 'gift' || 'giftDetail' in event) {
         console.log(`🎁 ${event.danmuInfo.userInfo.nickname} 送出 ${event.giftDetail.giftName}`);
+      } else if (event.actionType === 'like') {
+        console.log(`👍 ${event.danmuInfo.userInfo.nickname} 点赞`);
+      } else if (event.actionType === 'enterRoom') {
+        console.log(`🚪 ${event.danmuInfo.userInfo.nickname} 进入直播间`);
       }
     } else if (event && event.type) {
       switch (event.type) {
