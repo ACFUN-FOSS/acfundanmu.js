@@ -42,6 +42,7 @@ function parseUserInfo(userInfoData) {
 function parseComment(data) {
     const userInfo = parseUserInfo(data.userInfo || {});
     return {
+        actionType: 'comment',
         danmuInfo: {
             sendTime: Number(data.sendTimeMs || Date.now()),
             userInfo: {
@@ -61,6 +62,7 @@ function parseComment(data) {
 function parseLike(data) {
     const userInfo = parseUserInfo(data.userInfo || {});
     return {
+        actionType: 'like',
         danmuInfo: {
             sendTime: Number(data.sendTimeMs || Date.now()),
             userInfo: {
@@ -79,6 +81,7 @@ function parseLike(data) {
 function parseEnterRoom(data) {
     const userInfo = parseUserInfo(data.userInfo || {});
     return {
+        actionType: 'enterRoom',
         danmuInfo: {
             sendTime: Number(data.sendTimeMs || Date.now()),
             userInfo: {
@@ -97,6 +100,7 @@ function parseEnterRoom(data) {
 function parseFollowAuthor(data) {
     const userInfo = parseUserInfo(data.userInfo || {});
     return {
+        actionType: 'followAuthor',
         danmuInfo: {
             sendTime: Number(data.sendTimeMs || Date.now()),
             userInfo: {
@@ -114,6 +118,7 @@ function parseFollowAuthor(data) {
  */
 function parseThrowBanana(data) {
     return {
+        actionType: 'throwBanana',
         danmuInfo: {
             sendTime: Number(data.sendTimeMs || Date.now()),
             userInfo: {
@@ -138,6 +143,7 @@ function parseThrowBanana(data) {
 function parseGift(data, giftDetail) {
     const userInfo = parseUserInfo(data.userInfo || {});
     const gift = {
+        actionType: 'gift',
         danmuInfo: {
             sendTime: Number(data.sendTimeMs || Date.now()),
             userInfo: {
@@ -224,6 +230,7 @@ function parseRichText(data) {
         };
     });
     return {
+        actionType: 'richText',
         danmuInfo: {
             sendTime: Number(data.sendTimeMs || Date.now()),
             userInfo: {
@@ -254,6 +261,7 @@ function parseJoinClub(data) {
         managerType: types_1.ManagerType.NotManager
     };
     return {
+        actionType: 'joinClub',
         danmuInfo: {
             sendTime: Number(data.joinTimeMs || Date.now()),
             userInfo: fansInfo
@@ -280,6 +288,7 @@ function parseJoinClub(data) {
 function parseShareLive(data) {
     const userInfo = parseUserInfo(data.userInfo || {});
     return {
+        actionType: 'shareLive',
         danmuInfo: {
             sendTime: Number(data.sendTimeMs || Date.now()),
             userInfo: {
