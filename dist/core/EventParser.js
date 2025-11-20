@@ -15,6 +15,8 @@ exports.parseRichText = parseRichText;
 exports.parseJoinClub = parseJoinClub;
 exports.parseShareLive = parseShareLive;
 exports.parseActionSignal = parseActionSignal;
+exports.parseStateSignal = parseStateSignal;
+exports.parseNotifySignal = parseNotifySignal;
 const types_1 = require("../types");
 const acfun_1 = require("../proto/acfun");
 /**
@@ -437,6 +439,150 @@ function parseActionSignal(actionSignalData) {
     }
     catch (error) {
         console.error('[ActionSignal] 解析 ActionSignal 失败:', error);
+        return events;
+    }
+}
+function parseStateSignal(stateSignalData) {
+    const events = [];
+    try {
+        const state = acfun_1.AcFunDanmu.ZtLiveScStateSignal.decode(stateSignalData);
+        if (!state.item)
+            return events;
+        for (const item of state.item) {
+            switch (item.signalType) {
+                case 'AcfunStateSignalDisplayInfo': {
+                    const info = acfun_1.AcFunDanmu.AcfunStateSignalDisplayInfo.decode(item.payload);
+                    events.push({ type: 'bananaCount', data: Number(info.bananaCount || 0) });
+                    break;
+                }
+                case 'CommonStateSignalDisplayInfo': {
+                    const info = acfun_1.AcFunDanmu.CommonStateSignalDisplayInfo.decode(item.payload);
+                    events.push({ type: 'displayInfo', data: { watchingCount: String(info.watchingCount || ''), likeCount: String(info.likeCount || ''), likeDelta: Number(info.likeDelta || 0) } });
+                    break;
+                }
+                case 'CommonStateSignalTopUsers': {
+                    const top = acfun_1.AcFunDanmu.CommonStateSignalTopUsers.decode(item.payload);
+                    const users = (top.user || []).map(u => ({
+                        userInfo: {
+                            userID: Number(u.userInfo?.userId || 0),
+                            nickname: String(u.userInfo?.nickname || u.userInfo?.name || ''),
+                            avatar: String(u.userInfo?.avatar || ''),
+                            medal: { uperID: Number(u.userInfo?.medal?.uperId || 0), userID: Number(u.userInfo?.medal?.userId || 0), clubName: String(u.userInfo?.medal?.clubName || ''), level: Number(u.userInfo?.medal?.level || 0) },
+                            managerType: Number(u.userInfo?.managerType || 0)
+                        },
+                        anonymousUser: Boolean(u.anonymousUser),
+                        displaySendAmount: String(u.displaySendAmount || ''),
+                        customData: String(u.customWatchingListData || '')
+                    }));
+                    events.push({ type: 'topUsers', data: users });
+                    break;
+                }
+                case 'CommonStateSignalRecentComment': {
+                    const rc = acfun_1.AcFunDanmu.CommonStateSignalRecentComment.decode(item.payload);
+                    const list = (rc.comment || []).map(c => ({
+                        sendTime: Number(c.sendTimeMs || 0),
+                        userInfo: {
+                            userID: Number(c.userInfo?.userId || 0),
+                            nickname: String(c.userInfo?.nickname || c.userInfo?.name || ''),
+                            avatar: String(c.userInfo?.avatar || ''),
+                            medal: { uperID: Number(c.userInfo?.medal?.uperId || 0), userID: Number(c.userInfo?.medal?.userId || 0), clubName: String(c.userInfo?.medal?.clubName || ''), level: Number(c.userInfo?.medal?.level || 0) },
+                            managerType: Number(c.userInfo?.managerType || 0)
+                        },
+                        content: String(c.content || '')
+                    }));
+                    events.push({ type: 'recentComment', data: list });
+                    break;
+                }
+                case 'CommonStateSignalCurrentRedpackList': {
+                    const rl = acfun_1.AcFunDanmu.CommonStateSignalCurrentRedpackList.decode(item.payload);
+                    const list = (rl.redpacks || []).map(r => ({
+                        userInfo: {
+                            userID: Number(r.sender?.userId || 0),
+                            nickname: String(r.sender?.name || ''),
+                            avatar: '',
+                            medal: { uperID: 0, userID: 0, clubName: '', level: 0 },
+                            managerType: 0
+                        },
+                        displayStatus: Number(r.displayStatus || 0),
+                        grabBeginTime: Number(r.grabBeginTimeMs || 0),
+                        getTokenLatestTime: Number(r.getTokenLatestTimeMs || 0),
+                        redpackID: String(r.redPackId || ''),
+                        redpackBizUnit: String(r.redpackBizUnit || ''),
+                        redpackAmount: Number(r.redpackAmount || 0),
+                        settleBeginTime: Number(r.settleBeginTime || 0)
+                    }));
+                    events.push({ type: 'redpackList', data: list });
+                    break;
+                }
+                case 'CommonStateSignalChatCall': {
+                    const cc = acfun_1.AcFunDanmu.CommonStateSignalChatCall.decode(item.payload);
+                    events.push({ type: 'chatCall', data: { chatID: String(cc.chatId || ''), liveID: String(cc.liveId || ''), callTime: Number(cc.callTimestampMs || 0) } });
+                    break;
+                }
+                case 'CommonStateSignalChatAccept': {
+                    const ca = acfun_1.AcFunDanmu.CommonStateSignalChatAccept.decode(item.payload);
+                    events.push({ type: 'chatAccept', data: { chatID: String(ca.chatId || ''), mediaType: Number(ca.mediaType || 0), signalInfo: String(ca.aryaSignalInfo || '') } });
+                    break;
+                }
+                case 'CommonStateSignalChatReady': {
+                    const cr = acfun_1.AcFunDanmu.CommonStateSignalChatReady.decode(item.payload);
+                    const guest = {
+                        userID: Number(cr.guestUserInfo?.user?.userId || 0),
+                        nickname: String(cr.guestUserInfo?.user?.name || cr.guestUserInfo?.user?.nickname || ''),
+                        avatar: '',
+                        medal: { uperID: 0, userID: 0, clubName: '', level: 0 },
+                        managerType: 0
+                    };
+                    events.push({ type: 'chatReady', data: { chatID: String(cr.chatId || ''), guest, mediaType: Number(cr.mediaType || 0) } });
+                    break;
+                }
+                case 'CommonStateSignalChatEnd': {
+                    const ce = acfun_1.AcFunDanmu.CommonStateSignalChatEnd.decode(item.payload);
+                    events.push({ type: 'chatEnd', data: { chatID: String(ce.chatId || ''), endType: Number(ce.endType || 0) } });
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
+        }
+        return events;
+    }
+    catch {
+        return events;
+    }
+}
+function parseNotifySignal(notifySignalData) {
+    const events = [];
+    try {
+        const notify = acfun_1.AcFunDanmu.ZtLiveScNotifySignal.decode(notifySignalData);
+        if (!notify.item)
+            return events;
+        for (const item of notify.item) {
+            switch (item.signalType) {
+                case 'CommonNotifySignalKickedOut': {
+                    const ko = acfun_1.AcFunDanmu.CommonNotifySignalKickedOut.decode(item.payload);
+                    events.push({ type: 'kickedOut', data: String(ko.reason || '') });
+                    break;
+                }
+                case 'CommonNotifySignalViolationAlert': {
+                    const va = acfun_1.AcFunDanmu.CommonNotifySignalViolationAlert.decode(item.payload);
+                    events.push({ type: 'violationAlert', data: String(va.violationContent || '') });
+                    break;
+                }
+                case 'CommonNotifySignalLiveManagerState': {
+                    const ms = acfun_1.AcFunDanmu.CommonNotifySignalLiveManagerState.decode(item.payload);
+                    events.push({ type: 'managerState', data: Number(ms.state || 0) });
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
+        }
+        return events;
+    }
+    catch {
         return events;
     }
 }

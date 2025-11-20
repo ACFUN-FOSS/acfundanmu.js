@@ -482,13 +482,7 @@ export function parseStateSignal(stateSignalData: Buffer): any[] {
         case 'CommonStateSignalTopUsers': {
           const top = AcFunDanmu.CommonStateSignalTopUsers.decode(item.payload as Uint8Array)
           const users = (top.user || []).map(u => ({
-            userInfo: {
-              userID: Number(u.userInfo?.userId || 0),
-              nickname: String(u.userInfo?.nickname || u.userInfo?.name || ''),
-              avatar: String(u.userInfo?.avatar || ''),
-              medal: { uperID: Number(u.userInfo?.medal?.uperId || 0), userID: Number(u.userInfo?.medal?.userId || 0), clubName: String(u.userInfo?.medal?.clubName || ''), level: Number(u.userInfo?.medal?.level || 0) },
-              managerType: Number(u.userInfo?.managerType || 0)
-            },
+            userInfo: parseUserInfo(u.userInfo || {} as any),
             anonymousUser: Boolean(u.anonymousUser),
             displaySendAmount: String(u.displaySendAmount || ''),
             customData: String(u.customWatchingListData || '')
@@ -500,13 +494,7 @@ export function parseStateSignal(stateSignalData: Buffer): any[] {
           const rc = AcFunDanmu.CommonStateSignalRecentComment.decode(item.payload as Uint8Array)
           const list = (rc.comment || []).map(c => ({
             sendTime: Number(c.sendTimeMs || 0),
-            userInfo: {
-              userID: Number(c.userInfo?.userId || 0),
-              nickname: String(c.userInfo?.nickname || c.userInfo?.name || ''),
-              avatar: String(c.userInfo?.avatar || ''),
-              medal: { uperID: Number(c.userInfo?.medal?.uperId || 0), userID: Number(c.userInfo?.medal?.userId || 0), clubName: String(c.userInfo?.medal?.clubName || ''), level: Number(c.userInfo?.medal?.level || 0) },
-              managerType: Number(c.userInfo?.managerType || 0)
-            },
+            userInfo: parseUserInfo(c.userInfo || {} as any),
             content: String(c.content || '')
           }))
           events.push({ type: 'recentComment', data: list })
@@ -545,13 +533,7 @@ export function parseStateSignal(stateSignalData: Buffer): any[] {
         }
         case 'CommonStateSignalChatReady': {
           const cr = AcFunDanmu.CommonStateSignalChatReady.decode(item.payload as Uint8Array)
-          const guest = {
-            userID: Number(cr.guestUserInfo?.user?.userId || 0),
-            nickname: String(cr.guestUserInfo?.user?.name || cr.guestUserInfo?.user?.nickname || ''),
-            avatar: '',
-            medal: { uperID: 0, userID: 0, clubName: '', level: 0 },
-            managerType: 0
-          }
+          const guest = parseUserInfo(cr.guestUserInfo || {} as any)
           events.push({ type: 'chatReady', data: { chatID: String(cr.chatId || ''), guest, mediaType: Number(cr.mediaType || 0) } })
           break
         }

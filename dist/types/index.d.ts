@@ -207,6 +207,7 @@ export interface DanmuSession {
     ticketIndex: number;
     state: DanmuSessionState;
     callback: (event: DanmuMessage) => void;
+    signalCallback?: (event: SignalEvent) => void;
 }
 export interface UserInfo {
     userID: number;
@@ -328,6 +329,53 @@ export interface WatchingUser {
     customData: string;
 }
 export type TopUser = WatchingUser;
+export interface SignalEvent {
+    type: string;
+    data: any;
+}
+export declare enum RedpackDisplayStatus {
+    Appear = 0,
+    TokenAvailable = 1,
+    CanGrab = 2
+}
+export interface Redpack {
+    userInfo: UserInfo;
+    displayStatus: RedpackDisplayStatus;
+    grabBeginTime: number;
+    getTokenLatestTime: number;
+    redpackID: string;
+    redpackBizUnit: string;
+    redpackAmount: number;
+    settleBeginTime: number;
+}
+export declare enum ChatMediaType {
+    Unknown = 0,
+    Audio = 1,
+    Video = 2
+}
+export declare enum ChatEndType {
+    Unknown = 0,
+    Normal = 1
+}
+export interface ChatCall {
+    chatID: string;
+    liveID: string;
+    callTime: number;
+}
+export interface ChatAccept {
+    chatID: string;
+    mediaType: ChatMediaType;
+    signalInfo: string;
+}
+export interface ChatReady {
+    chatID: string;
+    guest: UserInfo;
+    mediaType: ChatMediaType;
+}
+export interface ChatEnd {
+    chatID: string;
+    endType: ChatEndType;
+}
 export interface ConnectionConfig {
     wsHost: string;
     connectTimeout: number;

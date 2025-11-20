@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ErrorCode = exports.ErrorType = exports.SharePlatformType = exports.ManagerType = exports.DanmuSessionState = void 0;
+exports.ErrorCode = exports.ErrorType = exports.ChatEndType = exports.ChatMediaType = exports.RedpackDisplayStatus = exports.SharePlatformType = exports.ManagerType = exports.DanmuSessionState = void 0;
 // 弹幕会话相关类型
 var DanmuSessionState;
 (function (DanmuSessionState) {
@@ -29,6 +29,23 @@ var SharePlatformType;
     SharePlatformType[SharePlatformType["PlatformWeChatMoments"] = 5] = "PlatformWeChatMoments";
     SharePlatformType[SharePlatformType["PlatformAcFunMoment"] = 6] = "PlatformAcFunMoment";
 })(SharePlatformType || (exports.SharePlatformType = SharePlatformType = {}));
+var RedpackDisplayStatus;
+(function (RedpackDisplayStatus) {
+    RedpackDisplayStatus[RedpackDisplayStatus["Appear"] = 0] = "Appear";
+    RedpackDisplayStatus[RedpackDisplayStatus["TokenAvailable"] = 1] = "TokenAvailable";
+    RedpackDisplayStatus[RedpackDisplayStatus["CanGrab"] = 2] = "CanGrab";
+})(RedpackDisplayStatus || (exports.RedpackDisplayStatus = RedpackDisplayStatus = {}));
+var ChatMediaType;
+(function (ChatMediaType) {
+    ChatMediaType[ChatMediaType["Unknown"] = 0] = "Unknown";
+    ChatMediaType[ChatMediaType["Audio"] = 1] = "Audio";
+    ChatMediaType[ChatMediaType["Video"] = 2] = "Video";
+})(ChatMediaType || (exports.ChatMediaType = ChatMediaType = {}));
+var ChatEndType;
+(function (ChatEndType) {
+    ChatEndType[ChatEndType["Unknown"] = 0] = "Unknown";
+    ChatEndType[ChatEndType["Normal"] = 1] = "Normal";
+})(ChatEndType || (exports.ChatEndType = ChatEndType = {}));
 // 错误类型定义
 var ErrorType;
 (function (ErrorType) {

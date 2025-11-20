@@ -917,11 +917,37 @@ class DanmuService {
      */
     handleStateSignal(session, payload) {
         try {
-            console.log('[StateSignal] 收到状态信号，长度:', payload.length);
-            // TODO: 解析状态信号
+            const events = EventParser.parseStateSignal(payload);
+            if (events.length > 0) {
+                this.sessionManager.updateStatistics(session.sessionId, {
+                    messageCount: (this.sessionManager.getExtendedData(session.sessionId)?.statistics.messageCount || 0) + events.length,
+                    lastMessageTime: Date.now()
+                });
+                for (const ev of events) {
+                    if (ev.type === 'recentComment') {
+                        for (const c of ev.data) {
+                            try {
+                                session.callback(c);
+                            }
+                            catch {
+                                this.sessionManager.incrementErrorCount(session.sessionId);
+                            }
+                        }
+                    }
+                    if (session.signalCallback) {
+                        try {
+                            session.signalCallback(ev);
+                        }
+                        catch {
+                            this.sessionManager.incrementErrorCount(session.sessionId);
+                        }
+                    }
+                }
+            }
         }
         catch (error) {
             console.error('处理状态信号失败:', error);
+            this.sessionManager.incrementErrorCount(session.sessionId);
         }
     }
     /**
@@ -929,11 +955,27 @@ class DanmuService {
      */
     handleNotifySignal(session, payload) {
         try {
-            console.log('[NotifySignal] 收到通知信号，长度:', payload.length);
-            // TODO: 解析通知信号
+            const events = EventParser.parseNotifySignal(payload);
+            if (events.length > 0) {
+                this.sessionManager.updateStatistics(session.sessionId, {
+                    messageCount: (this.sessionManager.getExtendedData(session.sessionId)?.statistics.messageCount || 0) + events.length,
+                    lastMessageTime: Date.now()
+                });
+                for (const ev of events) {
+                    if (session.signalCallback) {
+                        try {
+                            session.signalCallback(ev);
+                        }
+                        catch {
+                            this.sessionManager.incrementErrorCount(session.sessionId);
+                        }
+                    }
+                }
+            }
         }
         catch (error) {
             console.error('处理通知信号失败:', error);
+            this.sessionManager.incrementErrorCount(session.sessionId);
         }
     }
     /**

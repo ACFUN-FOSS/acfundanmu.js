@@ -48,3 +48,5 @@ export declare function parseShareLive(data: AcFunDanmu.ICommonActionSignalUserS
  * 解析行为信号中的所有事件
  */
 export declare function parseActionSignal(actionSignalData: Buffer): DanmuMessage[];
+export declare function parseStateSignal(stateSignalData: Buffer): any[];
+export declare function parseNotifySignal(notifySignalData: Buffer): any[];

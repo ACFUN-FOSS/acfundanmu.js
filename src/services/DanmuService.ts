@@ -1159,9 +1159,7 @@ export class DanmuService {
               try { session.callback(c as any) } catch { this.sessionManager.incrementErrorCount(session.sessionId) }
             }
           }
-          if (session.signalCallback) {
-            try { session.signalCallback(ev) } catch { this.sessionManager.incrementErrorCount(session.sessionId) }
-          }
+          try { (session.callback as any)(ev) } catch { this.sessionManager.incrementErrorCount(session.sessionId) }
         }
       }
     } catch (error) {
@@ -1182,9 +1180,7 @@ export class DanmuService {
           lastMessageTime: Date.now()
         })
         for (const ev of events) {
-          if (session.signalCallback) {
-            try { session.signalCallback(ev) } catch { this.sessionManager.incrementErrorCount(session.sessionId) }
-          }
+          try { (session.callback as any)(ev) } catch { this.sessionManager.incrementErrorCount(session.sessionId) }
         }
       }
     } catch (error) {
