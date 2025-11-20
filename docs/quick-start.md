@@ -105,10 +105,18 @@ const result = await api.danmu.startDanmu(liverUID, (event) => {
       console.log(`[进房] ${event.userInfo.nickname} 进入直播间`);
     }
   } else if (event && event.type) {
-    if (event.type === 'end') {
-      console.log('直播结束，自动关闭会话');
-    } else if (event.type === 'displayInfo') {
-      console.log('在线/点赞:', event.data.watchingCount, event.data.likeCount, '+', event.data.likeDelta);
+    switch (event.type) {
+      case 'displayInfo':
+        console.log('在线/点赞:', event.data.watchingCount, event.data.likeCount, '+', event.data.likeDelta);
+        break;
+      case 'topUsers':
+        console.log('礼物榜前三:', event.data.map((u: any) => u.userInfo.nickname).join(', '));
+        break;
+      case 'end':
+        console.log('直播结束，自动关闭会话');
+        break;
+      default:
+        break;
     }
   }
 });
@@ -408,3 +416,15 @@ main().catch(console.error);
 ---
 
 祝您使用愉快！🎉
+### 开播封面输入
+
+```typescript
+// URL
+await api.live.startLiveStream('title', 'https://example.com/c.jpg', 'kszt_xxx', false, false, 1, 101);
+
+// 数据URI
+await api.live.startLiveStream('title', 'data:image/png;base64,iVBORw0...', 'kszt_xxx', false, false, 1, 101);
+
+// 纯Base64
+await api.live.startLiveStream('title', 'iVBORw0...', 'kszt_xxx', false, false, 1, 101);
+```

@@ -125,6 +125,24 @@ interface AuthResponse {
   - `{ type: 'managerState', data: number }`
 - 结束事件：`{ type: 'end' }`（当直播关闭或被封禁时派发，并自动关闭会话）
 
+#### 行为事件结构
+```typescript
+interface DanmuInfo { sendTime: number; userInfo: UserInfo }
+interface Comment { content: string; sendTime: number; userInfo: UserInfo }
+interface Gift { giftDetail: GiftDetail; count: number; combo: number; value: number; sendTime: number; userInfo: UserInfo }
+```
+
+#### 状态/通知事件结构
+```typescript
+interface DisplayInfo { watchingCount: string; likeCount: string; likeDelta: number }
+type TopUser = WatchingUser
+interface Redpack { userInfo: UserInfo; displayStatus: number; grabBeginTime: number; getTokenLatestTime: number; redpackID: string; redpackBizUnit: string; redpackAmount: number; settleBeginTime: number }
+interface ChatCall { chatID: string; liveID: string; callTime: number }
+interface ChatAccept { chatID: string; mediaType: number; signalInfo: string }
+interface ChatReady { chatID: string; guest: UserInfo; mediaType: number }
+interface ChatEnd { chatID: string; endType: number }
+```
+
 ### stopDanmu - 停止弹幕
 
 停止指定会话的弹幕接收。
@@ -325,3 +343,15 @@ Array<{
 ```
 
 详细数据结构请参阅 [数据模型文档](./data-models.md)。
+#### 封面上传输入详解
+```text
+支持：
+- URL：例如 https://example.com/cover.jpg
+- 数据URI：data:image/png;base64,<base64>
+- 纯Base64：<base64>
+
+上传方式：multipart/form-data 二进制；字段名：cover
+错误：
+- 封面仅支持互联网图片URL或Base64
+- 封面下载失败 / 封面处理失败
+```

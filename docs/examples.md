@@ -58,6 +58,8 @@ async function monitorDanmu() {
     }
   });
 
+  // 会话结束后可以做清理或重启逻辑
+
   console.log('弹幕监控已启动:', result.data.sessionId);
 }
 ```
@@ -129,10 +131,10 @@ async function startLive() {
     await new Promise(r => setTimeout(r, 5000));
   }
 
-  // 5. 正式开播
+  // 5. 正式开播（封面支持 URL 或 Base64）
   const liveResult = await api.live.startLiveStream(
     '我的直播间',
-    'cover.jpg',
+    'data:image/jpeg;base64,iVBORw0...' /* 或 'https://example.com/cover.jpg' */,
     streamName,
     false, false, 1, 101
   );
@@ -156,7 +158,7 @@ async function getLiveStats() {
   
   for (const live of hotLives.data.lives) {
     // 获取每个直播的统计
-    const stats = await api.live.getLiveStatistics(live.liveId);
+    const stats = await api.live.getLiveStatistics(live.streamer.userId);
     
     console.log('直播间:', live.title);
     console.log('观看人数:', stats.data.totalViewers);
@@ -334,4 +336,16 @@ async function getWatchingList() {
     console.log('示例观众:', resp.data.slice(0, 3));
   }
 }
+```
+## 场景8：封面上传输入示例
+
+```typescript
+// URL 输入
+await api.live.startLiveStream('title', 'https://example.com/c.jpg', 'kszt_xxx', false, false, 1, 101);
+
+// 数据URI 输入
+await api.live.startLiveStream('title', 'data:image/png;base64,iVBORw0...', 'kszt_xxx', false, false, 1, 101);
+
+// 纯Base64 输入
+await api.live.startLiveStream('title', 'iVBORw0...', 'kszt_xxx', false, false, 1, 101);
 ```
