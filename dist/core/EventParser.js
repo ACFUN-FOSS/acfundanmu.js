@@ -463,13 +463,7 @@ function parseStateSignal(stateSignalData) {
                 case 'CommonStateSignalTopUsers': {
                     const top = acfun_1.AcFunDanmu.CommonStateSignalTopUsers.decode(item.payload);
                     const users = (top.user || []).map(u => ({
-                        userInfo: {
-                            userID: Number(u.userInfo?.userId || 0),
-                            nickname: String(u.userInfo?.nickname || u.userInfo?.name || ''),
-                            avatar: String(u.userInfo?.avatar || ''),
-                            medal: { uperID: Number(u.userInfo?.medal?.uperId || 0), userID: Number(u.userInfo?.medal?.userId || 0), clubName: String(u.userInfo?.medal?.clubName || ''), level: Number(u.userInfo?.medal?.level || 0) },
-                            managerType: Number(u.userInfo?.managerType || 0)
-                        },
+                        userInfo: parseUserInfo(u.userInfo || {}),
                         anonymousUser: Boolean(u.anonymousUser),
                         displaySendAmount: String(u.displaySendAmount || ''),
                         customData: String(u.customWatchingListData || '')
@@ -481,13 +475,7 @@ function parseStateSignal(stateSignalData) {
                     const rc = acfun_1.AcFunDanmu.CommonStateSignalRecentComment.decode(item.payload);
                     const list = (rc.comment || []).map(c => ({
                         sendTime: Number(c.sendTimeMs || 0),
-                        userInfo: {
-                            userID: Number(c.userInfo?.userId || 0),
-                            nickname: String(c.userInfo?.nickname || c.userInfo?.name || ''),
-                            avatar: String(c.userInfo?.avatar || ''),
-                            medal: { uperID: Number(c.userInfo?.medal?.uperId || 0), userID: Number(c.userInfo?.medal?.userId || 0), clubName: String(c.userInfo?.medal?.clubName || ''), level: Number(c.userInfo?.medal?.level || 0) },
-                            managerType: Number(c.userInfo?.managerType || 0)
-                        },
+                        userInfo: parseUserInfo(c.userInfo || {}),
                         content: String(c.content || '')
                     }));
                     events.push({ type: 'recentComment', data: list });
@@ -526,13 +514,7 @@ function parseStateSignal(stateSignalData) {
                 }
                 case 'CommonStateSignalChatReady': {
                     const cr = acfun_1.AcFunDanmu.CommonStateSignalChatReady.decode(item.payload);
-                    const guest = {
-                        userID: Number(cr.guestUserInfo?.user?.userId || 0),
-                        nickname: String(cr.guestUserInfo?.user?.name || cr.guestUserInfo?.user?.nickname || ''),
-                        avatar: '',
-                        medal: { uperID: 0, userID: 0, clubName: '', level: 0 },
-                        managerType: 0
-                    };
+                    const guest = parseUserInfo(cr.guestUserInfo || {});
                     events.push({ type: 'chatReady', data: { chatID: String(cr.chatId || ''), guest, mediaType: Number(cr.mediaType || 0) } });
                     break;
                 }

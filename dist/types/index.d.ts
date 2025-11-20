@@ -207,7 +207,6 @@ export interface DanmuSession {
     ticketIndex: number;
     state: DanmuSessionState;
     callback: (event: DanmuMessage) => void;
-    signalCallback?: (event: SignalEvent) => void;
 }
 export interface UserInfo {
     userID: number;
@@ -329,10 +328,6 @@ export interface WatchingUser {
     customData: string;
 }
 export type TopUser = WatchingUser;
-export interface SignalEvent {
-    type: string;
-    data: any;
-}
 export declare enum RedpackDisplayStatus {
     Appear = 0,
     TokenAvailable = 1,

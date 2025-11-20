@@ -934,13 +934,11 @@ class DanmuService {
                             }
                         }
                     }
-                    if (session.signalCallback) {
-                        try {
-                            session.signalCallback(ev);
-                        }
-                        catch {
-                            this.sessionManager.incrementErrorCount(session.sessionId);
-                        }
+                    try {
+                        session.callback(ev);
+                    }
+                    catch {
+                        this.sessionManager.incrementErrorCount(session.sessionId);
                     }
                 }
             }
@@ -962,13 +960,11 @@ class DanmuService {
                     lastMessageTime: Date.now()
                 });
                 for (const ev of events) {
-                    if (session.signalCallback) {
-                        try {
-                            session.signalCallback(ev);
-                        }
-                        catch {
-                            this.sessionManager.incrementErrorCount(session.sessionId);
-                        }
+                    try {
+                        session.callback(ev);
+                    }
+                    catch {
+                        this.sessionManager.incrementErrorCount(session.sessionId);
                     }
                 }
             }
