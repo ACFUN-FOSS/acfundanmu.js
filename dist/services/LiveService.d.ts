@@ -178,6 +178,7 @@ export declare class LiveService {
         panoramic: boolean;
         bizUnit: string;
         bizCustomData: string;
+        isLive: boolean;
     }>>;
     /**
      * 获取转码信息
