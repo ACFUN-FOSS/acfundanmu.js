@@ -981,20 +981,12 @@ export class LiveService {
       // 构建完整的Cookie头
       const cookieHeader = buildCookieString(tokenInfo.cookies, tokenInfo.deviceID);
 
-      // 使用apiPost发送请求（正确参数顺序，期望码为1）
-      const response = await apiPost<any>(
-        this.httpClient,
-        url,
-        '获取直播流状态',
-        formData.toString(),
-        {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Cookie': cookieHeader
-          }
-        },
-        1
-      );
+      const response = await this.httpClient.post<any>(url, formData.toString(), {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Cookie': cookieHeader
+        }
+      });
       
       if (!response.success) {
         return response as ApiResponse<any>;
