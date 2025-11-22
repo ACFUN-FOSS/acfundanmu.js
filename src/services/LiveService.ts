@@ -97,33 +97,6 @@ export class LiveService {
       const response = await apiGet<any>(this.httpClient, url, '获取热门直播列表');
 
       if (!response.success) {
-        const err = String((response as any).error || '');
-        try {
-          const idx = err.indexOf('{');
-          if (idx >= 0) {
-            const raw = err.substring(idx);
-            const parsed = JSON.parse(raw);
-            const msg = String(parsed.error_msg || parsed.error || '');
-            const code = Number(parsed.result);
-            const notLive = msg.includes('未开播') || code === 380023;
-            if (notLive) {
-              return {
-                success: true,
-                data: {
-                  liveID: '',
-                  streamName: '',
-                  title: '',
-                  liveCover: '',
-                  liveStartTime: 0,
-                  panoramic: false,
-                  bizUnit: '',
-                  bizCustomData: '',
-                  isLive: false
-                }
-              };
-            }
-          }
-        } catch {}
         return response as ApiResponse<any>;
       }
 
