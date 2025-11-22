@@ -354,3 +354,23 @@ Array<{
 - 封面仅支持互联网图片URL或Base64
 - 封面下载失败 / 封面处理失败
 ```
+### getLiveStreamStatus - 获取直播流状态
+
+返回当前主播直播状态与基础信息（未开播也返回成功并标记 isLive:false）。
+
+**响应结构：**
+```typescript
+{
+  liveID: string;
+  streamName: string;
+  title: string;
+  liveCover: string;
+  liveStartTime: number;
+  panoramic: boolean;
+  bizUnit: string;
+  bizCustomData: string;
+  isLive: boolean;
+}
+```
+
+说明：当主播未开播时，返回 `success:true` 且 `isLive:false`，其余字段为空/0/false；开播时 `isLive:true` 且包含完整基础信息。

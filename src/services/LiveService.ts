@@ -950,6 +950,7 @@ export class LiveService {
     panoramic: boolean;     // 是否全景直播
     bizUnit: string;       // 通常是"acfun"
     bizCustomData: string; // 直播分类，格式是 json
+    isLive: boolean;       // 是否正在开播
   }>> {
     try {
       // 从HTTP客户端的认证头中获取token信息
@@ -1001,11 +1002,30 @@ export class LiveService {
 
       const data = response.data;
       
-      // 验证响应结果 - 根据source目录中的逻辑：result为1表示成功
+      // 验证响应结果
       if (data.result !== 1) {
+        const msg = String(data.error_msg || data.error || '');
+        const code = Number(data.result);
+        const notLive = msg.includes('未开播') || code === 380023;
+        if (notLive) {
+          return {
+            success: true,
+            data: {
+              liveID: '',
+              streamName: '',
+              title: '',
+              liveCover: '',
+              liveStartTime: 0,
+              panoramic: false,
+              bizUnit: '',
+              bizCustomData: '',
+              isLive: false
+            }
+          };
+        }
         return {
           success: false,
-          error: `获取直播流状态失败: ${data.error || '未知错误'}`
+          error: `获取直播流状态失败: ${msg || '未知错误'}`
         };
       }
 
@@ -1019,7 +1039,8 @@ export class LiveService {
         liveStartTime: streamData.createTime || 0, // 映射 createTime -> liveStartTime
         panoramic: streamData.panoramic || false,   // panoramic 保持不变
         bizUnit: streamData.bizUnit || '',         // bizUnit 保持不变
-        bizCustomData: streamData.bizCustomData || '' // bizCustomData 保持不变
+        bizCustomData: streamData.bizCustomData || '', // bizCustomData 保持不变
+        isLive: true
       };
 
       return {
