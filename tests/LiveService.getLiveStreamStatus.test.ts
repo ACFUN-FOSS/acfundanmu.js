@@ -27,15 +27,18 @@ describe('LiveService.getLiveStreamStatus', () => {
     console.log('返回数据:', result.data || result.error);
 
     expect(result).toBeDefined();
-    expect(typeof result.success).toBe('boolean');
-    if (result.success && result.data) {
-      expect(typeof result.data.liveID).toBe('string');
-      expect(typeof result.data.streamName).toBe('string');
-      expect(typeof result.data.title).toBe('string');
-      expect(typeof result.data.liveStartTime).toBe('number');
-      expect(typeof result.data.panoramic).toBe('boolean');
-      expect(typeof result.data.bizUnit).toBe('string');
-      expect(typeof result.data.bizCustomData).toBe('string');
+    expect(result.success).toBe(true);
+    expect(result.data).toBeDefined();
+    expect(typeof (result.data as any).isLive).toBe('boolean');
+    const d = result.data as any;
+    if (d.isLive) {
+      expect(typeof d.liveID).toBe('string');
+      expect(typeof d.streamName).toBe('string');
+      expect(typeof d.title).toBe('string');
+      expect(typeof d.liveStartTime).toBe('number');
+      expect(typeof d.panoramic).toBe('boolean');
+      expect(typeof d.bizUnit).toBe('string');
+      expect(typeof d.bizCustomData).toBe('string');
     }
   }, 15000);
 });
