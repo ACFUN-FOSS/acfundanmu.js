@@ -38,7 +38,6 @@ export class HealthCheckManager {
       status: 'healthy'
     };
     this.healthData.set(sessionId, healthData);
-    console.log(`[HealthCheckManager] 初始化健康检查数据: ${sessionId}`);
   }
 
   /**
@@ -52,7 +51,6 @@ export class HealthCheckManager {
     }, interval);
 
     this.checkTimers.set(sessionId, timer);
-    console.log(`[HealthCheckManager] 启动定期健康检查: ${sessionId}, 间隔: ${interval}ms`);
   }
 
   /**
@@ -63,7 +61,6 @@ export class HealthCheckManager {
     if (timer) {
       clearInterval(timer);
       this.checkTimers.delete(sessionId);
-      console.log(`[HealthCheckManager] 停止定期健康检查: ${sessionId}`);
     }
   }
 
@@ -106,7 +103,6 @@ export class HealthCheckManager {
 
     const recommendations = this.generateRecommendations(healthData);
 
-    console.log(`[HealthCheckManager] 健康检查完成: ${sessionId}, 得分: ${healthData.healthScore}, 状态: ${healthData.status}`);
 
     return {
       sessionId,
@@ -295,7 +291,6 @@ export class HealthCheckManager {
   public cleanup(sessionId: string): void {
     this.stopPeriodicCheck(sessionId);
     this.healthData.delete(sessionId);
-    console.log(`[HealthCheckManager] 清理健康检查资源: ${sessionId}`);
   }
 
   /**

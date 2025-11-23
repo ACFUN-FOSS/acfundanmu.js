@@ -225,7 +225,6 @@ export class ApiServer {
 
   public start(): void {
     this.app.listen(this.config.port, this.config.host, () => {
-      console.log(`AcFunLive API Server 运行在 http://${this.config.host}:${this.config.port}`);
     });
   }
 

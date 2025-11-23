@@ -210,8 +210,6 @@ export class LiveService {
 
       const data = response.data;
       
-      // 添加调试信息，查看完整的API响应结构
-      console.log('getLiveCategories API response:', JSON.stringify(data, null, 2));
       
       // 验证API响应结果
       if (data.result !== 0) {
@@ -1728,7 +1726,6 @@ export class LiveService {
       });
 
       const result = response.data;
-      console.log(result)
       if (!result || result.result !== 0) {
         return {
           success: false,

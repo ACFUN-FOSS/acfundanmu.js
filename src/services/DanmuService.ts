@@ -314,7 +314,6 @@ export class DanmuService {
       }
 
       const data = response.data;
-      console.log('[getLiveToken] API响应数据:', JSON.stringify(data, null, 2));
       
       if (data.result !== 1) {
         return {
@@ -328,9 +327,6 @@ export class DanmuService {
       const enterRoomAttach = data.data?.enterRoomAttach || '';  // 进入房间的附加数据，必需字段
       const availableTickets = data.data?.availableTickets || [];
       
-      console.log('[getLiveToken] liveID:', liveID);
-      console.log('[getLiveToken] enterRoomAttach:', enterRoomAttach);
-      console.log('[getLiveToken] availableTickets:', availableTickets);
 
       if (!liveID) {
         return {
@@ -378,7 +374,6 @@ export class DanmuService {
 
         ws.on('open', async () => {
           clearTimeout(connectionTimeout);
-          console.log(`WebSocket 连接成功: ${session.sessionId}`);
           
           // 发送注册消息
           const registerResult = await this.sendRegisterMessage(ws, session, tokenInfo);
@@ -410,7 +405,6 @@ export class DanmuService {
         });
 
         ws.on('close', (code, reason) => {
-          console.log(`WebSocket 关闭: ${session.sessionId}, code: ${code}, reason: ${reason}`);
           clearTimeout(connectionTimeout);
           
           // 处理重连
@@ -453,14 +447,12 @@ export class DanmuService {
   private async sendRegisterMessage(ws: WebSocket, session: DanmuSession, tokenInfo: TokenInfo): Promise<ApiResponse<void>> {
     try {
       session.state = DanmuSessionState.Registering;
-      console.log('[Register] 开始发送注册消息');
       
       // 1. 构造 RegisterRequest
       const registerRequest = ProtoUtils.buildRegisterRequest(tokenInfo);
       
       // 2. 序列化 RegisterRequest
       const registerBytes = AcFunDanmu.Im.Basic.RegisterRequest.encode(registerRequest).finish();
-      console.log('[Register] RegisterRequest 序列化完成, 长度:', registerBytes.length);
       
       // 3. 构造 UpstreamPayload
       session.seqID++;
@@ -475,14 +467,9 @@ export class DanmuService {
       // 序列化 UpstreamPayload 以获取其长度
       const upstreamPayloadBytes = AcFunDanmu.Im.Basic.UpstreamPayload.encode(upstreamPayload).finish();
       const decodedPayloadLen = upstreamPayloadBytes.length;
-      console.log('[Register] UpstreamPayload 序列化后长度:', decodedPayloadLen);
       
       // 4. 构造 PacketHeader - 包含TokenInfo和decodedPayloadLen
-      console.log('[Register] serviceToken原文:', tokenInfo.serviceToken);
-      console.log('[Register] serviceToken长度:', tokenInfo.serviceToken.length);
       const tokenBytes = new Uint8Array(Buffer.from(tokenInfo.serviceToken, 'utf-8'));
-      console.log('[Register] token字节数组长度:', tokenBytes.length);
-      console.log('[Register] token字节数组前50字节(hex):', Buffer.from(tokenBytes.slice(0, 50)).toString('hex'));
       
       const packetHeader: AcFunDanmu.Im.Basic.IPacketHeader = {
         appId: 0,
@@ -500,21 +487,15 @@ export class DanmuService {
       
       // 调试：检查序列化后的PacketHeader
       const headerBytes = AcFunDanmu.Im.Basic.PacketHeader.encode(packetHeader).finish();
-      console.log('[Register] PacketHeader序列化后长度:', headerBytes.length);
-      console.log('[Register] PacketHeader前100字节(hex):', Buffer.from(headerBytes.slice(0, Math.min(100, headerBytes.length))).toString('hex'));
       
       // 5. 解码 SecurityKey (Base64 -> Buffer)
       const securityKeyBuffer = Buffer.from(tokenInfo.securityKey, 'base64');
-      console.log('[Register] SecurityKey 长度:', securityKeyBuffer.length);
       
       // 6. 编码消息帧
       const frame = ProtoUtils.encode(packetHeader, upstreamPayload, securityKeyBuffer);
-      console.log('[Register] 消息帧总长度:', frame.length);
-      console.log('[Register] 消息帧前100字节:', frame.slice(0, Math.min(100, frame.length)).toString('hex'));
       
       // 7. 发送
       ws.send(frame);
-      console.log('[Register] 已发送注册消息');
       
       return { success: true };
     } catch (error) {
@@ -540,8 +521,6 @@ export class DanmuService {
       // 解码 SecurityKey
       const securityKeyBuffer = Buffer.from(tokenInfo.securityKey, 'base64');
       
-      console.log('[WebSocket] 接收到消息，长度:', data.length);
-      console.log('[WebSocket] 消息前50字节:', data.slice(0, Math.min(50, data.length)).toString('hex'));
       
       // 解析消息
       const result = ProtoUtils.decode(data, securityKeyBuffer, session.sessionKey);
@@ -555,11 +534,9 @@ export class DanmuService {
       if (session.appID === undefined || session.appID === 0) {
         if (result.header.appId && result.header.appId !== 0) {
           session.appID = Number(result.header.appId);
-          console.log('[WebSocket] 从服务器获取到 appID:', session.appID);
         }
       }
       
-      console.log('[WebSocket] 解析成功，命令:', result.payload.command);
       
       // 根据命令类型处理
       this.handleCommand(session, result.header, result.payload);
@@ -578,7 +555,6 @@ export class DanmuService {
   ): Promise<void> {
     const command = payload.command;
     
-    console.log('[Command] 收到命令:', command);
     
     switch (command) {
       case 'Basic.Register':
@@ -587,7 +563,6 @@ export class DanmuService {
         
       case 'Basic.KeepAlive':
         // 心跳响应，无需处理
-        console.log('[KeepAlive] 收到 KeepAlive 响应');
         break;
         
       case 'Global.ZtLiveInteractive.CsCmd':
@@ -599,7 +574,6 @@ export class DanmuService {
         break;
         
       case 'Basic.Unregister':
-        console.log('[Unregister] 收到 Unregister 信号，关闭连接');
         this.destroySession(session.sessionId);
         break;
         
@@ -607,7 +581,6 @@ export class DanmuService {
         if (payload.errorCode && payload.errorCode > 0) {
           console.error('[Command] 收到错误消息:', payload.errorCode, payload.errorMsg);
         } else {
-          console.log('[Command] 未知命令:', command);
         }
     }
   }
@@ -625,9 +598,6 @@ export class DanmuService {
       // 使用 Protobuf 解析注册响应
       const response = AcFunDanmu.Im.Basic.RegisterResponse.decode(payload.payloadData);
       
-      console.log('[RegisterResponse] 注册成功');
-      console.log('[RegisterResponse] instanceId:', response.instanceId);
-      console.log('[RegisterResponse] sessKey 长度:', response.sessKey ? response.sessKey.length : 0);
       
       // 关键：instanceID是Long类型，直接赋值，不要转换为Number（对照Go代码proto.go:73）
       // JavaScript的Number最大安全整数是2^53-1，转换Long可能丢失精度
@@ -636,7 +606,6 @@ export class DanmuService {
       // sessKey 是 Uint8Array
       if (response.sessKey && response.sessKey.length > 0) {
         session.sessionKey = Buffer.from(response.sessKey as Uint8Array);
-        console.log('[RegisterResponse] sessionKey 长度:', session.sessionKey.length);
       }
       
       // 发送 KeepAlive
@@ -663,7 +632,6 @@ export class DanmuService {
       const cmdAck = AcFunDanmu.ZtLiveCsCmdAck.decode(payload.payloadData);
       const cmdType = cmdAck.cmdAckType;
       
-      console.log('[CsCmd] 收到命令响应:', cmdType);
       
       switch (cmdType) {
         case 'ZtLiveCsEnterRoomAck':
@@ -676,7 +644,6 @@ export class DanmuService {
           const enterRoomAck = AcFunDanmu.ZtLiveCsEnterRoomAck.decode(cmdAck.payload);
           const heartbeatInterval = Number(enterRoomAck.heartbeatIntervalMs || 10000);
           
-          console.log('[CsCmd] 进入房间成功，心跳间隔:', heartbeatInterval, 'ms');
           session.state = DanmuSessionState.Active;
           
           // 启动心跳
@@ -688,7 +655,6 @@ export class DanmuService {
           break;
           
         default:
-          console.log('[CsCmd] 未知的 CsCmd 类型:', cmdType);
       }
     } catch (error) {
       console.error('[CsCmd] 处理交互命令失败:', error);
@@ -716,11 +682,9 @@ export class DanmuService {
       // 处理 GZIP 压缩
       if (pushMsg.compressionType === AcFunDanmu.ZtLiveScMessage.CompressionType.GZIP && messagePayload) {
         messagePayload = zlib.gunzipSync(Buffer.from(messagePayload));
-        console.log('[PushMessage] GZIP 解压完成, 解压后长度:', messagePayload.length);
       }
       
       const messageType = pushMsg.messageType;
-      console.log('[PushMessage] 消息类型:', messageType);
       
       switch (messageType) {
         case 'ZtLiveScActionSignal':
@@ -748,7 +712,6 @@ export class DanmuService {
           break;
           
         default:
-          console.log('[PushMessage] 未知的消息类型:', messageType);
       }
     } catch (error) {
       console.error('[PushMessage] 处理推送消息失败:', error);
@@ -766,11 +729,9 @@ export class DanmuService {
     const analysis = this.reconnectManager.analyzeDisconnectReason(closeCode);
     this.reconnectManager.recordDisconnect(sessionId, analysis.reason, reason);
     
-    console.log(`[Disconnect] 会话断开: ${sessionId}, 原因: ${analysis.reason}`);
 
     // 判断是否应该重连
     if (!this.reconnectManager.shouldReconnect(sessionId, closeCode)) {
-      console.log('[Disconnect] 不需要重连，清理资源');
       this.destroySession(sessionId);
       return;
     }
@@ -781,7 +742,6 @@ export class DanmuService {
     // 计算退避时间
     const backoffTime = this.reconnectManager.calculateBackoffTime(sessionId);
     
-    console.log(`[Disconnect] 将在 ${backoffTime}ms 后重连`);
     
     // 延迟重连
     setTimeout(() => {
@@ -840,7 +800,6 @@ export class DanmuService {
     try {
       const wsResult = await this.connectWebSocket(session, tokenInfo);
       if (wsResult.success) {
-        console.log('[Reconnect] 重连成功');
         this.reconnectManager.onReconnectSuccess(sessionId);
         this.healthCheckManager.resetErrorCount(sessionId);
       } else {
@@ -860,7 +819,6 @@ export class DanmuService {
    * 销毁会话
    */
   private destroySession(sessionId: string): void {
-    console.log(`清理会话: ${sessionId}`);
     
     // 停止心跳
     this.heartbeatManager.cleanup(sessionId);
@@ -868,7 +826,6 @@ export class DanmuService {
     if (timer) {
       clearInterval(timer);
       this.heartbeatTimers.delete(sessionId);
-      console.log('心跳定时器已清理');
     }
 
     // 关闭 WebSocket
@@ -883,7 +840,6 @@ export class DanmuService {
         console.error('关闭 WebSocket 失败:', error);
       }
       this.wsClients.delete(sessionId);
-      console.log('WebSocket 已关闭');
     }
 
     // 清理管理器资源
@@ -895,7 +851,6 @@ export class DanmuService {
     const session = this.sessions.get(sessionId);
     if (session) {
       this.sessions.delete(sessionId);
-      console.log('会话已删除');
     }
   }
 
@@ -942,7 +897,6 @@ export class DanmuService {
     );
     
     ws.send(frame);
-    console.log('[KeepAlive] 已发送 KeepAlive 消息');
   }
   
   /**
@@ -965,7 +919,6 @@ export class DanmuService {
     // 关键：enterRoomAttach是从startPlay API获取的必需字段
     const enterRoomRequest = ProtoUtils.buildEnterRoomRequest(session.enterRoomAttach);
     
-    console.log('[EnterRoom] 使用 enterRoomAttach:', session.enterRoomAttach);
     
     // 2. 序列化 ZtLiveCsEnterRoom
     const enterRoomBytes = AcFunDanmu.ZtLiveCsEnterRoom.encode(enterRoomRequest).finish();
@@ -998,7 +951,6 @@ export class DanmuService {
     );
     
     ws.send(frame);
-    console.log('[EnterRoom] 已发送进入房间消息');
   }
   
   /**
@@ -1046,7 +998,6 @@ export class DanmuService {
     }, interval);
     
     this.heartbeatTimers.set(session.sessionId, timer);
-    console.log('心跳已启动，间隔:', interval, 'ms');
   }
   
   /**
@@ -1111,7 +1062,6 @@ export class DanmuService {
       // payload是Protobuf格式的ZtLiveScActionSignal，不是JSON
       const events = EventParser.parseActionSignal(payload);
       
-      console.log('[ActionSignal] 解析到', events.length, '条事件');
       
       // 更新消息计数
       this.sessionManager.updateStatistics(session.sessionId, {

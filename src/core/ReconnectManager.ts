@@ -37,7 +37,6 @@ export class ReconnectManager {
     if (state) {
       state.disconnectReason = reason;
       state.lastError = error || '';
-      console.log(`[ReconnectManager] 记录断开: ${sessionId}, 原因: ${reason}`);
     }
   }
 
@@ -46,25 +45,21 @@ export class ReconnectManager {
    */
   public shouldReconnect(sessionId: string, closeCode?: number): boolean {
     if (!this.config.enableAutoReconnect) {
-      console.log('[ReconnectManager] 自动重连已禁用');
       return false;
     }
 
     const state = this.reconnectStates.get(sessionId);
     if (!state) {
-      console.log('[ReconnectManager] 未找到重连状态');
       return false;
     }
 
     // 检查关闭码，正常关闭不重连
     if (closeCode === 1000 || closeCode === 1001) {
-      console.log('[ReconnectManager] 正常关闭，不重连');
       return false;
     }
 
     // 检查是否超过最大重试次数
     if (state.currentAttempt >= state.maxAttempts) {
-      console.log('[ReconnectManager] 已达到最大重试次数');
       return false;
     }
 
@@ -89,7 +84,6 @@ export class ReconnectManager {
     state.backoffTime = backoffTime;
     state.nextRetryTime = Date.now() + backoffTime;
 
-    console.log(`[ReconnectManager] 计算退避时间: ${backoffTime}ms, 下次重试: ${new Date(state.nextRetryTime).toISOString()}`);
     
     return backoffTime;
   }
@@ -107,7 +101,6 @@ export class ReconnectManager {
     state.isReconnecting = true;
     state.currentAttempt++;
     
-    console.log(`[ReconnectManager] 开始第 ${state.currentAttempt}/${state.maxAttempts} 次重连`);
   }
 
   /**
@@ -117,7 +110,6 @@ export class ReconnectManager {
     const state = this.reconnectStates.get(sessionId);
     if (!state) return;
 
-    console.log('[ReconnectManager] 重连成功，重置重连状态');
     
     // 重置重连状态
     state.isReconnecting = false;
@@ -154,7 +146,6 @@ export class ReconnectManager {
       callback: session.callback
     };
 
-    console.log('[ReconnectManager] 已保存会话状态');
   }
 
   /**
@@ -167,7 +158,6 @@ export class ReconnectManager {
       return null;
     }
 
-    console.log('[ReconnectManager] 恢复会话状态');
     return state.savedState;
   }
 
@@ -191,7 +181,6 @@ export class ReconnectManager {
    */
   public cleanup(sessionId: string): void {
     this.reconnectStates.delete(sessionId);
-    console.log(`[ReconnectManager] 已清理重连状态: ${sessionId}`);
   }
 
   /**
