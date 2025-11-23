@@ -198,8 +198,6 @@ class AuthService {
             // 根据source目录逻辑，需要从响应头中提取cookies
             const responseCookies = response.headers?.['set-cookie'] || [];
             // 调试信息：打印响应头
-            console.log('确认二维码登录响应头:', JSON.stringify(response.headers, null, 2));
-            console.log('提取的cookies:', responseCookies);
             const cookies = responseCookies.map((cookie) => {
                 // 提取cookie的name=value部分
                 const cookieParts = cookie.split(';')[0].split('=');
@@ -208,7 +206,6 @@ class AuthService {
                 }
                 return cookie;
             });
-            console.log('处理后的cookies:', cookies);
             // 根据source目录逻辑，二维码登录成功后需要获取cookies
             // 然后调用getServiceToken来获取完整的tokenInfo
             return await this.getServiceToken(cookies);

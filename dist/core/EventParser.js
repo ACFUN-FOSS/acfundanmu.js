@@ -306,60 +306,6 @@ function parseShareLive(data) {
 /**
  * 打印弹幕事件详细信息（适配统一的danmuInfo结构）
  */
-function printDanmuEvent(event) {
-    console.log('\n========== 收到弹幕事件 ==========');
-    // 现在所有事件都有danmuInfo
-    const danmuInfo = event.danmuInfo;
-    const timestamp = new Date(danmuInfo.sendTime).toLocaleString('zh-CN');
-    console.log('时间:', timestamp);
-    console.log('用户:', danmuInfo.userInfo.nickname, `(ID: ${danmuInfo.userInfo.userID})`);
-    if ('content' in event) {
-        // Comment
-        console.log('类型: 评论');
-        console.log('内容:', event.content);
-    }
-    else if ('giftDetail' in event) {
-        // Gift
-        console.log('类型: 礼物');
-        console.log('礼物:', event.giftDetail.giftName);
-        console.log('数量:', event.count);
-        console.log('Combo:', event.combo);
-        console.log('价值:', event.value);
-    }
-    else if ('bananaCount' in event) {
-        // ThrowBanana
-        console.log('类型: 投蕉');
-        console.log('数量:', event.bananaCount);
-    }
-    else if ('segments' in event) {
-        // RichText
-        console.log('类型: 富文本');
-        console.log('内容:', event.segments.map((s) => {
-            if (s.type === 'plain')
-                return s.text;
-            if (s.type === 'userInfo')
-                return `@${s.userInfo.nickname}`;
-            if (s.type === 'image')
-                return '[图片]';
-            return '';
-        }).join(''));
-    }
-    else if ('fansInfo' in event) {
-        // JoinClub
-        console.log('类型: 加入守护团');
-        console.log('粉丝:', event.fansInfo.nickname);
-        console.log('主播:', event.uperInfo.nickname);
-    }
-    else if ('sharePlatform' in event) {
-        // ShareLive
-        console.log('类型: 分享直播');
-    }
-    else {
-        // Like / EnterRoom / FollowAuthor
-        console.log('类型: 点赞/进房/关注');
-    }
-    console.log('================================\n');
-}
 /**
  * 解析行为信号中的所有事件
  */
@@ -368,13 +314,11 @@ function parseActionSignal(actionSignalData) {
     try {
         // 使用 Protobuf 解析 ZtLiveScActionSignal
         const actionSignal = acfun_1.AcFunDanmu.ZtLiveScActionSignal.decode(actionSignalData);
-        console.log('[ActionSignal] 解析 ActionSignal, item 数量:', actionSignal.item?.length || 0);
         if (!actionSignal.item) {
             return events;
         }
         for (const item of actionSignal.item) {
             const signalType = item.signalType;
-            console.log('[ActionSignal] signalType:', signalType, 'payload 数量:', item.payload?.length || 0);
             for (const payload of item.payload || []) {
                 try {
                     switch (signalType) {
@@ -382,7 +326,6 @@ function parseActionSignal(actionSignalData) {
                             const comment = acfun_1.AcFunDanmu.CommonActionSignalComment.decode(payload);
                             const event = parseComment(comment);
                             events.push(event);
-                            printDanmuEvent(event);
                             break;
                         }
                         case 'CommonActionSignalLike': {
@@ -404,21 +347,18 @@ function parseActionSignal(actionSignalData) {
                             const banana = acfun_1.AcFunDanmu.AcfunActionSignalThrowBanana.decode(payload);
                             const event = parseThrowBanana(banana);
                             events.push(event);
-                            printDanmuEvent(event);
                             break;
                         }
                         case 'CommonActionSignalGift': {
                             const gift = acfun_1.AcFunDanmu.CommonActionSignalGift.decode(payload);
                             const event = parseGift(gift);
                             events.push(event);
-                            printDanmuEvent(event);
                             break;
                         }
                         case 'CommonActionSignalRichText': {
                             const richText = acfun_1.AcFunDanmu.CommonActionSignalRichText.decode(payload);
                             const event = parseRichText(richText);
                             events.push(event);
-                            printDanmuEvent(event);
                             break;
                         }
                         case 'AcfunActionSignalJoinClub': {
@@ -434,7 +374,6 @@ function parseActionSignal(actionSignalData) {
                             break;
                         }
                         default:
-                            console.log('[ActionSignal] 未知的信号类型:', signalType);
                     }
                 }
                 catch (error) {

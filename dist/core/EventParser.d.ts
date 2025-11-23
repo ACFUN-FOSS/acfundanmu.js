@@ -45,6 +45,9 @@ export declare function parseJoinClub(data: AcFunDanmu.IAcfunActionSignalJoinClu
  */
 export declare function parseShareLive(data: AcFunDanmu.ICommonActionSignalUserShareLive): any;
 /**
+ * 打印弹幕事件详细信息（适配统一的danmuInfo结构）
+ */
+/**
  * 解析行为信号中的所有事件
  */
 export declare function parseActionSignal(actionSignalData: Buffer): DanmuMessage[];

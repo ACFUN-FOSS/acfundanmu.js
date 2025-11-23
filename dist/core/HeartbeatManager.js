@@ -30,7 +30,6 @@ class HeartbeatManager {
         this.stats.set(sessionId, stats);
         // 设置默认心跳间隔
         this.intervals.set(sessionId, this.config.heartbeatInterval);
-        console.log(`[HeartbeatManager] 初始化心跳统计: ${sessionId}, 默认间隔: ${this.config.heartbeatInterval}ms`);
     }
     /**
      * 启动心跳
@@ -39,7 +38,6 @@ class HeartbeatManager {
         // 停止旧的心跳
         this.stop(sessionId);
         const interval = intervalOverride || this.intervals.get(sessionId) || this.config.heartbeatInterval;
-        console.log(`[HeartbeatManager] 启动心跳: ${sessionId}, 间隔: ${interval}ms`);
         const timer = setInterval(async () => {
             await this.sendHeartbeat(sessionId, callback);
         }, interval);
@@ -54,7 +52,6 @@ class HeartbeatManager {
         if (timer) {
             clearInterval(timer);
             this.timers.delete(sessionId);
-            console.log(`[HeartbeatManager] 停止心跳: ${sessionId}`);
         }
     }
     /**
@@ -98,7 +95,6 @@ class HeartbeatManager {
         if (this.config.enableAdaptiveHeartbeat) {
             this.adjustHeartbeatInterval(sessionId);
         }
-        console.log(`[HeartbeatManager] 心跳成功: ${sessionId}, 延迟: ${latency}ms, 平均延迟: ${stats.avgLatency.toFixed(2)}ms`);
     }
     /**
      * 心跳失败回调
@@ -150,7 +146,6 @@ class HeartbeatManager {
         }
         // 只有间隔变化超过20%才重启心跳
         if (Math.abs(newInterval - currentInterval) / currentInterval > 0.2) {
-            console.log(`[HeartbeatManager] 调整心跳间隔: ${sessionId}, ${currentInterval}ms -> ${newInterval}ms`);
             // 不直接重启，而是等待下次心跳周期应用新间隔
             this.intervals.set(sessionId, newInterval);
         }
@@ -228,7 +223,6 @@ class HeartbeatManager {
             stats.consecutiveFailed = 0;
             stats.latencyHistory = [];
             stats.avgLatency = 0;
-            console.log(`[HeartbeatManager] 重置心跳统计: ${sessionId}`);
         }
     }
     /**
@@ -238,7 +232,6 @@ class HeartbeatManager {
         this.stop(sessionId);
         this.stats.delete(sessionId);
         this.intervals.delete(sessionId);
-        console.log(`[HeartbeatManager] 清理心跳资源: ${sessionId}`);
     }
     /**
      * 获取所有会话的心跳统计

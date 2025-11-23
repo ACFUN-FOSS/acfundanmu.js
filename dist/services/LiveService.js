@@ -169,8 +169,6 @@ class LiveService {
                 return response;
             }
             const data = response.data;
-            // 添加调试信息，查看完整的API响应结构
-            console.log('getLiveCategories API response:', JSON.stringify(data, null, 2));
             // 验证API响应结果
             if (data.result !== 0) {
                 return {
@@ -736,13 +734,12 @@ class LiveService {
             const formData = new URLSearchParams();
             // 构建完整的Cookie头
             const cookieHeader = (0, ApiUtils_1.buildCookieString)(tokenInfo.cookies, tokenInfo.deviceID);
-            // 使用apiPost发送请求（正确参数顺序，期望码为1）
-            const response = await (0, ApiUtils_1.apiPost)(this.httpClient, url, '获取直播流状态', formData.toString(), {
+            const response = await this.httpClient.post(url, formData.toString(), {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'Cookie': cookieHeader
                 }
-            }, 1);
+            });
             if (!response.success) {
                 return response;
             }
@@ -1382,7 +1379,6 @@ class LiveService {
                 },
             });
             const result = response.data;
-            console.log(result);
             if (!result || result.result !== 0) {
                 return {
                     success: false,

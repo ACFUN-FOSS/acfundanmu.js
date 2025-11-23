@@ -54,7 +54,6 @@ class SessionManager {
         };
         this.sessions.set(session.sessionId, extendedData);
         this.updateIndex(session.sessionId, session.liverUID, session.state);
-        console.log(`[SessionManager] 创建会话: ${session.sessionId}, 主播: ${session.liverUID}`);
     }
     /**
      * 获取会话
@@ -89,7 +88,6 @@ class SessionManager {
         if (newState === types_1.DanmuSessionState.Active && oldState !== types_1.DanmuSessionState.Active) {
             data.connectedAt = Date.now();
         }
-        console.log(`[SessionManager] 更新会话状态: ${sessionId}, ${oldState} -> ${newState}`);
     }
     /**
      * 更新索引
@@ -117,7 +115,6 @@ class SessionManager {
         this.stateIndex.get(state)?.delete(sessionId);
         // 删除会话
         this.sessions.delete(sessionId);
-        console.log(`[SessionManager] 移除会话: ${sessionId}`);
         return true;
     }
     /**
@@ -271,7 +268,6 @@ class SessionManager {
             return false;
         data.isPaused = true;
         data.pausedAt = Date.now();
-        console.log(`[SessionManager] 暂停会话: ${sessionId}`);
         return true;
     }
     /**
@@ -284,7 +280,6 @@ class SessionManager {
         data.isPaused = false;
         data.pausedAt = undefined;
         data.lastActiveAt = Date.now();
-        console.log(`[SessionManager] 恢复会话: ${sessionId}`);
         return true;
     }
     /**
@@ -300,7 +295,6 @@ class SessionManager {
                 cleanedSessionIds.push(sessionId);
             }
         }
-        console.log(`[SessionManager] 清理空闲会话: ${cleanedSessionIds.length}个`);
         return {
             cleanedCount: cleanedSessionIds.length,
             sessionIds: cleanedSessionIds
@@ -317,7 +311,6 @@ class SessionManager {
                 cleanedSessionIds.push(sessionId);
             }
         }
-        console.log(`[SessionManager] 清理失败会话: ${cleanedSessionIds.length}个`);
         return {
             cleanedCount: cleanedSessionIds.length,
             sessionIds: cleanedSessionIds
