@@ -156,7 +156,7 @@ function parseGift(data, giftDetail) {
         },
         giftDetail: giftDetail || {
             giftID: Number(data.giftId || 0),
-            giftName: `礼物${data.giftId}`,
+            giftName: '未知礼物',
             arLiveName: '',
             payWalletType: 0,
             price: 0,
@@ -365,7 +365,6 @@ function parseActionSignal(actionSignalData) {
                             const joinClub = acfun_1.AcFunDanmu.AcfunActionSignalJoinClub.decode(payload);
                             const event = parseJoinClub(joinClub);
                             events.push(event);
-                            printDanmuEvent(event);
                             break;
                         }
                         case 'CommonActionSignalUserShareLive': {
@@ -424,7 +423,8 @@ function parseStateSignal(stateSignalData) {
                     const list = (rc.comment || []).map(c => ({
                         sendTime: Number(c.sendTimeMs || 0),
                         userInfo: parseUserInfo(c.userInfo || {}),
-                        content: String(c.content || '')
+                        content: String(c.content || ''),
+                        isHistory: true
                     }));
                     events.push({ type: 'recentComment', data: list });
                     break;

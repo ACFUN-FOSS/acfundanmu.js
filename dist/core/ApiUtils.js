@@ -302,10 +302,11 @@ async function kuaiShouApiPost(httpClient, baseUrl, operation, additionalParams,
  */
 function buildCookieString(cookies, deviceID) {
     if (cookies && cookies.length > 0) {
-        return cookies.map((cookie) => {
+        const base = cookies.map((cookie) => {
             const parts = cookie.split(';')[0].split('=');
             return `${parts[0]}=${parts[1]}`;
         }).join('; ');
+        return `${base}; _did=${deviceID}`;
     }
     else {
         return `_did=${deviceID}`;

@@ -13,7 +13,11 @@ const ManagerService_1 = require("./services/ManagerService");
 const ReplayService_1 = require("./services/ReplayService");
 class AcFunLiveApi {
     constructor(config) {
-        this.httpClient = new HttpClient_1.HttpClient(config);
+        const defaultConfig = {
+            retryCount: 3,
+            ...config
+        };
+        this.httpClient = new HttpClient_1.HttpClient(defaultConfig);
         this.auth = new AuthService_1.AuthService(this.httpClient);
         this.badge = new BadgeService_1.BadgeService(this.httpClient);
         this.danmu = new DanmuService_1.DanmuService(this.httpClient);

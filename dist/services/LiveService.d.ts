@@ -3,6 +3,7 @@ import { ApiResponse, LiveRoomInfo, WatchingUser } from '../types';
 export declare class LiveService {
     private httpClient;
     constructor(httpClient: HttpClient);
+    private buildCoverUploadBody;
     /**
      * 获取直播推流地址
      */

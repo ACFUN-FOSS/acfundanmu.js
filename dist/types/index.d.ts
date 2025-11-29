@@ -127,6 +127,18 @@ export interface ApiConfig {
     timeout?: number;
     retryCount?: number;
     headers?: Record<string, string>;
+    preferIPv4?: boolean;
+    minTlsVersion?: 'TLSv1.2' | 'TLSv1.3';
+    caPath?: string;
+    proxy?: {
+        host: string;
+        port: number;
+        protocol?: 'http' | 'https';
+        auth?: {
+            username: string;
+            password: string;
+        };
+    };
 }
 export interface ServerConfig {
     port: number;

@@ -9,6 +9,7 @@ export declare class DanmuService {
     private heartbeatManager;
     private healthCheckManager;
     private sessionManager;
+    private giftRegistry;
     private readonly WS_HOST;
     private readonly TIMEOUT;
     private config;
@@ -111,7 +112,12 @@ export declare class DanmuService {
      * 处理状态变更
      */
     private handleStatusChanged;
-    sendComment(liverUID: string, content: string): Promise<ApiResponse<void>>;
+    /**
+     * 发送弹幕
+     * @param liveId 直播间ID
+     * @param content 弹幕内容
+     */
+    sendDanmu(liveId: string, content: string): Promise<ApiResponse<any>>;
     /**
      * 获取所有会话列表
      */

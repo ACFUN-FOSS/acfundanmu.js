@@ -47,6 +47,8 @@ const ReconnectManager_1 = require("../core/ReconnectManager");
 const HeartbeatManager_1 = require("../core/HeartbeatManager");
 const HealthCheckManager_1 = require("../core/HealthCheckManager");
 const SessionManager_1 = require("../core/SessionManager");
+const GiftService_1 = require("./GiftService");
+const GiftRegistry_1 = require("./GiftRegistry");
 class DanmuService {
     constructor(httpClient, config) {
         this.sessions = new Map();
@@ -77,6 +79,7 @@ class DanmuService {
         this.heartbeatManager = new HeartbeatManager_1.HeartbeatManager(this.config);
         this.healthCheckManager = new HealthCheckManager_1.HealthCheckManager(this.config, this.heartbeatManager);
         this.sessionManager = new SessionManager_1.SessionManager(this.healthCheckManager);
+        this.giftRegistry = new GiftRegistry_1.GiftRegistry(new GiftService_1.GiftService(this.httpClient));
     }
     /**
      * 获取直播间信息
@@ -525,6 +528,11 @@ class DanmuService {
                     const enterRoomAck = acfun_1.AcFunDanmu.ZtLiveCsEnterRoomAck.decode(cmdAck.payload);
                     const heartbeatInterval = Number(enterRoomAck.heartbeatIntervalMs || 10000);
                     session.state = types_1.DanmuSessionState.Active;
+                    // 预热礼物映射
+                    try {
+                        await this.giftRegistry.warmup(session.liveID);
+                    }
+                    catch { }
                     // 启动心跳
                     this.startHeartbeat(session, heartbeatInterval);
                     break;
@@ -840,6 +848,13 @@ class DanmuService {
         try {
             // payload是Protobuf格式的ZtLiveScActionSignal，不是JSON
             const events = EventParser.parseActionSignal(payload);
+            // 礼物名称补全
+            for (const ev of events) {
+                if (ev && ev.actionType === 'gift') {
+                    const id = Number(ev.giftDetail?.giftID || 0);
+                    ev.giftDetail = this.giftRegistry.enrich(id);
+                }
+            }
             // 更新消息计数
             this.sessionManager.updateStatistics(session.sessionId, {
                 messageCount: (this.sessionManager.getExtendedData(session.sessionId)?.statistics.messageCount || 0) + events.length
@@ -946,12 +961,44 @@ class DanmuService {
             console.error('处理状态变更失败:', error);
         }
     }
-    async sendComment(liverUID, content) {
-        // TODO: 实现发送弹幕逻辑
-        return {
-            success: false,
-            error: '未实现'
-        };
+    /**
+     * 发送弹幕
+     * @param liveId 直播间ID
+     * @param content 弹幕内容
+     */
+    async sendDanmu(liveId, content) {
+        try {
+            // 获取并验证token信息
+            const { tokenInfo, error } = this.httpClient.getValidatedTokenInfo();
+            if (error || !tokenInfo) {
+                return {
+                    success: false,
+                    error: error || 'token信息不完整，缺少必要的字段'
+                };
+            }
+            // 构建请求URL
+            // 参考: https://api.kuaishouzt.com/rest/zt/live/web/audience/action/comment?subBiz=mainApp&kpn=ACFUN_APP&kpf=PC_WEB&userId=${userID}&did=${deviceID}&acfun.midground.api_st=${serviceToken}
+            const url = `https://api.kuaishouzt.com/rest/zt/live/web/audience/action/comment?subBiz=mainApp&kpn=ACFUN_APP&kpf=PC_WEB&userId=${tokenInfo.userID}&did=${tokenInfo.deviceID}&acfun.midground.api_st=${tokenInfo.serviceToken}`;
+            // 构建表单数据
+            const formData = new URLSearchParams();
+            formData.append('liveId', liveId);
+            formData.append('content', content);
+            // 发送POST请求
+            const response = await this.httpClient.post(url, formData.toString(), {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    // 使用通用的Referer，如果有liverUID更好，但liveId通常足够
+                    'Referer': 'https://live.acfun.cn/'
+                }
+            });
+            return response;
+        }
+        catch (error) {
+            return {
+                success: false,
+                error: `发送弹幕失败: ${error instanceof Error ? error.message : String(error)}`
+            };
+        }
     }
     // ==================== 会话管理接口 ====================
     /**

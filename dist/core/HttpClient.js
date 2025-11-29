@@ -5,14 +5,65 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HttpClient = void 0;
 const axios_1 = __importDefault(require("axios"));
+const http_1 = __importDefault(require("http"));
+const https_1 = __importDefault(require("https"));
+const dns_1 = __importDefault(require("dns"));
+const fs_1 = __importDefault(require("fs"));
 const SignUtils_1 = require("./SignUtils");
 class HttpClient {
     constructor(config) {
         this.config = config || {};
+        const preferIPv4 = this.config.preferIPv4 ?? true;
+        if (dns_1.default.setDefaultResultOrder && preferIPv4) {
+            dns_1.default.setDefaultResultOrder('ipv4first');
+        }
+        let ca;
+        const caPath = this.config.caPath || process.env.ACFUN_CA_FILE || process.env.NODE_EXTRA_CA_CERTS;
+        if (caPath) {
+            try {
+                ca = fs_1.default.readFileSync(caPath);
+            }
+            catch { }
+        }
+        const httpsAgent = new https_1.default.Agent({
+            keepAlive: true,
+            maxSockets: 50,
+            timeout: 30000,
+            ca,
+            minVersion: this.config.minTlsVersion || 'TLSv1.2',
+            maxVersion: 'TLSv1.3',
+        });
+        const httpAgent = new http_1.default.Agent({
+            keepAlive: true,
+            maxSockets: 50,
+            timeout: 30000,
+        });
+        let proxy = undefined;
+        if (this.config.proxy) {
+            proxy = this.config.proxy;
+        }
+        else {
+            const proxyEnv = process.env.HTTPS_PROXY || process.env.HTTP_PROXY;
+            if (proxyEnv) {
+                try {
+                    const u = new URL(proxyEnv);
+                    proxy = {
+                        protocol: (u.protocol || 'http:').replace(':', ''),
+                        host: u.hostname,
+                        port: parseInt(u.port || (u.protocol === 'https:' ? '443' : '80'), 10),
+                        auth: u.username ? { username: u.username, password: u.password || '' } : undefined,
+                    };
+                }
+                catch { }
+            }
+        }
         this.client = axios_1.default.create({
             baseURL: this.config.baseUrl,
             timeout: this.config.timeout || 10000,
             headers: this.config.headers || {},
+            httpAgent,
+            httpsAgent,
+            proxy,
         });
         this.setupInterceptors();
     }
@@ -38,8 +89,33 @@ class HttpClient {
         // 响应拦截器
         this.client.interceptors.response.use((response) => {
             return response;
-        }, (error) => {
-            // TODO: 错误处理和重试逻辑
+        }, async (error) => {
+            const config = error?.config || {};
+            const message = error?.message || '';
+            const code = error?.code || '';
+            const maxRetries = typeof this.config.retryCount === 'number' ? this.config.retryCount : 3;
+            const current = config.__retryCount || 0;
+            // Determine if we should retry
+            // Retry on:
+            // 1. Network errors (no response)
+            // 2. Server errors (5xx)
+            // 3. Rate limiting (429)
+            // 4. Specific connection errors (original logic)
+            const isNetworkError = !error.response;
+            const isServerError = error.response && (error.response.status >= 500 || error.response.status === 429);
+            const isConnectionError = code === 'ECONNRESET' ||
+                code === 'EPROTO' ||
+                code === 'ETIMEDOUT' ||
+                code?.startsWith('ERR_SSL') ||
+                message?.includes('disconnected before secure TLS connection');
+            const shouldRetry = current < maxRetries && (isNetworkError || isServerError || isConnectionError);
+            if (shouldRetry) {
+                config.__retryCount = current + 1;
+                const base = 300;
+                const wait = Math.min(Math.floor(base * Math.pow(1.8, current)), 2000); // Cap wait time at 2s
+                await new Promise((r) => setTimeout(r, wait));
+                return this.client.request(config);
+            }
             return Promise.reject(error);
         });
     }
