@@ -240,7 +240,7 @@ StreamUrl {
 
 **响应：** `WatchingUser[]`
 
-**HTTP 路由：** `GET /api/live/watching-list/:liveId`
+> 说明：从 v1.0 起已移除内置 HTTP 路由与服务器，统一通过 SDK 方法调用（例如 `api.live.getWatchingList(liveId)`）。
 
 
 ## 用户 API

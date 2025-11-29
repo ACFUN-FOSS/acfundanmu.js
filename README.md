@@ -1,6 +1,6 @@
 # AcFun直播平台HTTP API 项目文档
 
-欢迎使用 AcFun 直播平台 HTTP API 封装库！本项目将复杂的 WebSocket 弹幕协议转换为简单易用的 HTTP API 和 SDK，帮助开发者快速集成 AcFun 直播功能。
+欢迎使用 AcFun 直播平台 HTTP API 封装库！本项目将复杂的 WebSocket 弹幕协议封装为类型安全的 SDK，帮助开发者快速集成 AcFun 直播功能。
 
 ## 📚 文档目录
 
@@ -26,9 +26,8 @@
 ### 类型安全
 完整的 TypeScript 类型定义，提供优秀的代码提示和类型检查。
 
-### 双模式支持
+### 使用模式
 - **SDK模式**：直接在 Node.js 应用中集成使用
-- **服务器模式**：作为独立的 HTTP 服务部署
 
 ### 高级会话管理
 - 多直播间并发监控
@@ -46,7 +45,7 @@
 | HTTP客户端 | Axios |
 | WebSocket | ws库 |
 | 协议解析 | Protobuf |
-| HTTP服务器 | Express.js |
+| HTTP服务器 | （已移除） |
 | 测试框架 | Jest |
 | 构建工具 | TypeScript编译器(tsc) |
 
