@@ -1159,12 +1159,47 @@ export class DanmuService {
   }
   
 
-  public async sendComment(liverUID: string, content: string): Promise<ApiResponse<void>> {
-    // TODO: 实现发送弹幕逻辑
-    return {
-      success: false,
-      error: '未实现'
-    };
+  /**
+   * 发送弹幕
+   * @param liveId 直播间ID
+   * @param content 弹幕内容
+   */
+  public async sendDanmu(liveId: string, content: string): Promise<ApiResponse<any>> {
+    try {
+      // 获取并验证token信息
+      const { tokenInfo, error } = this.httpClient.getValidatedTokenInfo();
+      if (error || !tokenInfo) {
+        return {
+          success: false,
+          error: error || 'token信息不完整，缺少必要的字段'
+        };
+      }
+
+      // 构建请求URL
+      // 参考: https://api.kuaishouzt.com/rest/zt/live/web/audience/action/comment?subBiz=mainApp&kpn=ACFUN_APP&kpf=PC_WEB&userId=${userID}&did=${deviceID}&acfun.midground.api_st=${serviceToken}
+      const url = `https://api.kuaishouzt.com/rest/zt/live/web/audience/action/comment?subBiz=mainApp&kpn=ACFUN_APP&kpf=PC_WEB&userId=${tokenInfo.userID}&did=${tokenInfo.deviceID}&acfun.midground.api_st=${tokenInfo.serviceToken}`;
+
+      // 构建表单数据
+      const formData = new URLSearchParams();
+      formData.append('liveId', liveId);
+      formData.append('content', content);
+
+      // 发送POST请求
+      const response = await this.httpClient.post(url, formData.toString(), {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          // 使用通用的Referer，如果有liverUID更好，但liveId通常足够
+          'Referer': 'https://live.acfun.cn/' 
+        }
+      });
+
+      return response;
+    } catch (error) {
+      return {
+        success: false,
+        error: `发送弹幕失败: ${error instanceof Error ? error.message : String(error)}`
+      };
+    }
   }
 
   // ==================== 会话管理接口 ====================
