@@ -5,15 +5,6 @@
 
 import {
   DanmuMessage,
-  Comment,
-  Like,
-  EnterRoom,
-  FollowAuthor,
-  ThrowBanana,
-  Gift,
-  RichText,
-  JoinClub,
-  ShareLive,
   UserInfo,
   ManagerType,
   GiftDetail,
@@ -168,7 +159,7 @@ export function parseGift(data: AcFunDanmu.ICommonActionSignalGift, giftDetail?:
     },
     giftDetail: giftDetail || {
       giftID: Number(data.giftId || 0),
-      giftName: `礼物${data.giftId}`,
+      giftName: '未知礼物',
       arLiveName: '',
       payWalletType: 0,
       price: 0,
@@ -455,7 +446,8 @@ export function parseStateSignal(stateSignalData: Buffer): any[] {
           const list = (rc.comment || []).map(c => ({
             sendTime: Number(c.sendTimeMs || 0),
             userInfo: parseUserInfo(c.userInfo || {} as any),
-            content: String(c.content || '')
+            content: String(c.content || ''),
+            isHistory: true
           }))
           events.push({ type: 'recentComment', data: list })
           break

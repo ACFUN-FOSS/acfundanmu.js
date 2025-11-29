@@ -48,6 +48,8 @@ import { ReconnectManager } from '../core/ReconnectManager';
 import { HeartbeatManager } from '../core/HeartbeatManager';
 import { HealthCheckManager } from '../core/HealthCheckManager';
 import { SessionManager } from '../core/SessionManager';
+import { GiftService } from './GiftService';
+import { GiftRegistry } from './GiftRegistry';
 
 export class DanmuService {
   private httpClient: HttpClient;
@@ -60,6 +62,7 @@ export class DanmuService {
   private heartbeatManager: HeartbeatManager;
   private healthCheckManager: HealthCheckManager;
   private sessionManager: SessionManager;
+  private giftRegistry: GiftRegistry;
   
   // 常量定义
   private readonly WS_HOST = 'wss://klink-newproduct-ws3.kwaizt.com/';
@@ -93,6 +96,7 @@ export class DanmuService {
     this.heartbeatManager = new HeartbeatManager(this.config);
     this.healthCheckManager = new HealthCheckManager(this.config, this.heartbeatManager);
     this.sessionManager = new SessionManager(this.healthCheckManager);
+    this.giftRegistry = new GiftRegistry(new GiftService(this.httpClient));
   }
 
   /**
@@ -646,6 +650,9 @@ export class DanmuService {
           
           session.state = DanmuSessionState.Active;
           
+          // 预热礼物映射
+          try { await this.giftRegistry.warmup(session.liveID) } catch {}
+
           // 启动心跳
           this.startHeartbeat(session, heartbeatInterval);
           break;
@@ -1061,7 +1068,13 @@ export class DanmuService {
     try {
       // payload是Protobuf格式的ZtLiveScActionSignal，不是JSON
       const events = EventParser.parseActionSignal(payload);
-      
+      // 礼物名称补全
+      for (const ev of events as any[]) {
+        if (ev && ev.actionType === 'gift') {
+          const id = Number(ev.giftDetail?.giftID || 0)
+          ev.giftDetail = this.giftRegistry.enrich(id)
+        }
+      }
       
       // 更新消息计数
       this.sessionManager.updateStatistics(session.sessionId, {
