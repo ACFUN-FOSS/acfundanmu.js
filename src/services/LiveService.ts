@@ -1,12 +1,74 @@
 import { HttpClient } from '../core/HttpClient';
 import { ApiResponse, LiveRoomInfo, WatchingUser, ManagerType } from '../types';
 import { apiGet, apiPost, kuaiShouApiPost, buildCookieString, buildFormData, buildCommonHeaders } from '../core/ApiUtils';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export class LiveService {
   private httpClient: HttpClient;
 
   constructor(httpClient: HttpClient) {
     this.httpClient = httpClient;
+  }
+
+  private async buildCoverUploadBody(coverFile: string): Promise<{ body: Buffer; contentType: string }> {
+    const urlMatch = /^https?:\/\//i.test(coverFile);
+    const dataUriMatch = /^data:image\/(png|jpe?g|gif|webp);base64,/i.test(coverFile);
+    const pureBase64Match = !dataUriMatch && /^[A-Za-z0-9+/=]+$/i.test(coverFile);
+
+    let filename = 'cover.bin';
+    let bytes: Buffer | null = null;
+    if (urlMatch) {
+      try {
+        const u = new URL(coverFile);
+        const name = u.pathname.split('/').filter(Boolean).pop();
+        if (name) filename = name;
+      } catch {}
+      const resp = await this.httpClient.get<any>(coverFile, { responseType: 'arraybuffer' } as any);
+      if (!resp.success || !resp.data) {
+        throw new Error('封面下载失败');
+      }
+      bytes = Buffer.from(resp.data);
+    } else if (dataUriMatch) {
+      const comma = coverFile.indexOf(',');
+      const meta = coverFile.substring(0, comma);
+      const body = coverFile.substring(comma + 1);
+      if (/image\/png/i.test(meta)) filename = 'cover.png';
+      else if (/image\/jpe?g/i.test(meta)) filename = 'cover.jpg';
+      else if (/image\/gif/i.test(meta)) filename = 'cover.gif';
+      else if (/image\/webp/i.test(meta)) filename = 'cover.webp';
+      bytes = Buffer.from(body, 'base64');
+    } else if (pureBase64Match) {
+      bytes = Buffer.from(coverFile, 'base64');
+    } else {
+      // 尝试作为本地文件处理
+      try {
+        if (fs.existsSync(coverFile)) {
+          const stat = fs.statSync(coverFile);
+          if (stat.isFile()) {
+            filename = path.basename(coverFile);
+            bytes = fs.readFileSync(coverFile);
+          }
+        }
+      } catch (e) {
+        // 忽略文件系统错误，继续抛出默认错误
+      }
+
+      if (!bytes) {
+        throw new Error('封面仅支持互联网图片URL、Base64或本地文件路径');
+      }
+    }
+
+    if (!bytes) {
+      throw new Error('封面处理失败');
+    }
+
+    const boundary = `----acfunlive_${Date.now()}`;
+    const head = Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="cover"; filename="${filename}"\r\nContent-Type: application/octet-stream\r\n\r\n`);
+    const tail = Buffer.from(`\r\n--${boundary}--\r\n`);
+    const requestBody = Buffer.concat([head, bytes, tail]);
+    const contentType = `multipart/form-data; boundary=${boundary}`;
+    return { body: requestBody, contentType };
   }
   /**
    * 获取直播推流地址
@@ -1205,47 +1267,13 @@ export class LiveService {
       let contentType = 'application/x-www-form-urlencoded';
 
       if (coverFile) {
-        const urlMatch = /^https?:\/\//i.test(coverFile);
-        const dataUriMatch = /^data:image\/(png|jpe?g|gif|webp);base64,/i.test(coverFile);
-        const pureBase64Match = !dataUriMatch && /^[A-Za-z0-9+/=]+$/i.test(coverFile);
-
-        let filename = 'cover.bin';
-        let bytes: Buffer | null = null;
-        if (urlMatch) {
-          try {
-            const u = new URL(coverFile);
-            const name = u.pathname.split('/').filter(Boolean).pop();
-            if (name) filename = name;
-          } catch {}
-          const resp = await this.httpClient.get<any>(coverFile, { responseType: 'arraybuffer' } as any);
-          if (!resp.success || !resp.data) {
-            return { success: false, error: '封面下载失败' };
-          }
-          bytes = Buffer.from(resp.data);
-        } else if (dataUriMatch) {
-          const comma = coverFile.indexOf(',');
-          const meta = coverFile.substring(0, comma);
-          const body = coverFile.substring(comma + 1);
-          if (/image\/png/i.test(meta)) filename = 'cover.png';
-          else if (/image\/jpe?g/i.test(meta)) filename = 'cover.jpg';
-          else if (/image\/gif/i.test(meta)) filename = 'cover.gif';
-          else if (/image\/webp/i.test(meta)) filename = 'cover.webp';
-          bytes = Buffer.from(body, 'base64');
-        } else if (pureBase64Match) {
-          bytes = Buffer.from(coverFile, 'base64');
-        } else {
-          return { success: false, error: '封面仅支持互联网图片URL或Base64' };
+        try {
+          const cover = await this.buildCoverUploadBody(coverFile);
+          requestBody = cover.body;
+          contentType = cover.contentType;
+        } catch (e) {
+          return { success: false, error: e instanceof Error ? e.message : String(e) };
         }
-
-        if (!bytes) {
-          return { success: false, error: '封面处理失败' };
-        }
-
-        const boundary = `----acfunlive_${Date.now()}`;
-        const head = Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="cover"; filename="${filename}"\r\nContent-Type: application/octet-stream\r\n\r\n`);
-        const tail = Buffer.from(`\r\n--${boundary}--\r\n`);
-        requestBody = Buffer.concat([head, bytes, tail]);
-        contentType = `multipart/form-data; boundary=${boundary}`;
       }
 
       // 构建完整的Cookie头
@@ -1407,59 +1435,47 @@ export class LiveService {
       const query = queryParams.toString();
       const fullUrl = query ? `${url}&${query}` : url;
       
-      // 处理封面文件
       let requestBody: any = '';
       let contentType = 'application/x-www-form-urlencoded';
-      
+
       if (coverFile) {
-        const urlMatch = /^https?:\/\//i.test(coverFile);
-        const dataUriMatch = /^data:image\/(png|jpe?g|gif|webp);base64,/i.test(coverFile);
-        const pureBase64Match = !dataUriMatch && /^[A-Za-z0-9+/=]+$/i.test(coverFile);
-
-        let filename = 'cover.bin';
-        let bytes: Buffer | null = null;
-        if (urlMatch) {
-          try {
-            const u = new URL(coverFile);
-            const name = u.pathname.split('/').filter(Boolean).pop();
-            if (name) filename = name;
-          } catch {}
-          const resp = await this.httpClient.get<any>(coverFile, { responseType: 'arraybuffer' } as any);
-          if (!resp.success || !resp.data) {
-            return { success: false, error: '封面下载失败' };
-          }
-          bytes = Buffer.from(resp.data);
-        } else if (dataUriMatch) {
-          const comma = coverFile.indexOf(',');
-          const meta = coverFile.substring(0, comma);
-          const body = coverFile.substring(comma + 1);
-          if (/image\/png/i.test(meta)) filename = 'cover.png';
-          else if (/image\/jpe?g/i.test(meta)) filename = 'cover.jpg';
-          else if (/image\/gif/i.test(meta)) filename = 'cover.gif';
-          else if (/image\/webp/i.test(meta)) filename = 'cover.webp';
-          bytes = Buffer.from(body, 'base64');
-        } else if (pureBase64Match) {
-          bytes = Buffer.from(coverFile, 'base64');
-        } else {
-          return { success: false, error: '封面仅支持互联网图片URL或Base64' };
+        try {
+          const cover = await this.buildCoverUploadBody(coverFile);
+          requestBody = cover.body;
+          contentType = cover.contentType;
+        } catch (e) {
+          return { success: false, error: e instanceof Error ? e.message : String(e) };
         }
-
-        if (!bytes) {
-          return { success: false, error: '封面处理失败' };
-        }
-
-        const boundary = `----acfunlive_${Date.now()}`;
-        const head = Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="cover"; filename="${filename}"\r\nContent-Type: application/octet-stream\r\n\r\n`);
-        const tail = Buffer.from(`\r\n--${boundary}--\r\n`);
-        requestBody = Buffer.concat([head, bytes, tail]);
-        contentType = `multipart/form-data; boundary=${boundary}`;
       }
-      
-      const response = await this.httpClient.post<any>(fullUrl, requestBody, {
-        headers: {
-          'Content-Type': contentType
-        }
-      });
+
+      const cookieHeader = buildCookieString(tokenInfo.cookies, tokenInfo.deviceID);
+
+      let response: ApiResponse<any>;
+      const refererUrl = `https://live.acfun.cn/live/${tokenInfo.userID}`;
+      if (contentType.startsWith('multipart/form-data')) {
+        response = await this.httpClient.post<any>(fullUrl, requestBody, {
+          headers: {
+            'Content-Type': contentType,
+            'Cookie': cookieHeader,
+            'Referer': refererUrl
+          }
+        });
+      } else {
+        response = await apiPost<any>(
+          this.httpClient,
+          fullUrl,
+          '更改直播间标题和封面',
+          requestBody,
+          {
+            headers: {
+              'Content-Type': contentType,
+              'Cookie': cookieHeader,
+              'Referer': refererUrl
+            }
+          },
+          1
+        );
+      }
       
       if (!response.success) {
         return response as ApiResponse<any>;

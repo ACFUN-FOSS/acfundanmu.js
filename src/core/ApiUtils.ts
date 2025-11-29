@@ -351,10 +351,11 @@ export async function kuaiShouApiPost<T>(
  */
 export function buildCookieString(cookies: string[] | null, deviceID: string): string {
   if (cookies && cookies.length > 0) {
-    return cookies.map((cookie: string) => {
+    const base = cookies.map((cookie: string) => {
       const parts = cookie.split(';')[0].split('=');
       return `${parts[0]}=${parts[1]}`;
     }).join('; ');
+    return `${base}; _did=${deviceID}`;
   } else {
     return `_did=${deviceID}`;
   }

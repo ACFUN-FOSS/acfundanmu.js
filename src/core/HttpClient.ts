@@ -1,4 +1,8 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import http from 'http';
+import https from 'https';
+import dns from 'dns';
+import fs from 'fs';
 import { ApiConfig, ApiResponse, TokenInfo } from '../types';
 import { SignUtils } from './SignUtils';
 
@@ -13,10 +17,59 @@ export class HttpClient {
 
   constructor(config?: ApiConfig) {
     this.config = config || {};
+    const preferIPv4 = this.config.preferIPv4 ?? true;
+    if ((dns as any).setDefaultResultOrder && preferIPv4) {
+      (dns as any).setDefaultResultOrder('ipv4first');
+    }
+
+    let ca: Buffer | undefined;
+    const caPath = this.config.caPath || process.env.ACFUN_CA_FILE || process.env.NODE_EXTRA_CA_CERTS;
+    if (caPath) {
+      try {
+        ca = fs.readFileSync(caPath);
+      } catch {}
+    }
+
+    const httpsAgent = new https.Agent({
+      keepAlive: true,
+      maxSockets: 50,
+      timeout: 30000,
+      ca,
+      minVersion: this.config.minTlsVersion || 'TLSv1.2',
+      maxVersion: 'TLSv1.3',
+    });
+
+    const httpAgent = new http.Agent({
+      keepAlive: true,
+      maxSockets: 50,
+      timeout: 30000,
+    });
+
+    let proxy: any = undefined;
+    if (this.config.proxy) {
+      proxy = this.config.proxy;
+    } else {
+      const proxyEnv = process.env.HTTPS_PROXY || process.env.HTTP_PROXY;
+      if (proxyEnv) {
+        try {
+          const u = new URL(proxyEnv);
+          proxy = {
+            protocol: (u.protocol || 'http:').replace(':', ''),
+            host: u.hostname,
+            port: parseInt(u.port || (u.protocol === 'https:' ? '443' : '80'), 10),
+            auth: u.username ? { username: u.username, password: u.password || '' } : undefined,
+          };
+        } catch {}
+      }
+    }
+
     this.client = axios.create({
       baseURL: this.config.baseUrl,
       timeout: this.config.timeout || 10000,
       headers: this.config.headers || {},
+      httpAgent,
+      httpsAgent,
+      proxy,
     });
 
     this.setupInterceptors();
@@ -52,8 +105,25 @@ export class HttpClient {
       (response: AxiosResponse) => {
         return response;
       },
-      (error) => {
-        // TODO: 错误处理和重试逻辑
+      async (error) => {
+        const config: any = error?.config || {};
+        const message: string = error?.message || '';
+        const code: string = error?.code || '';
+        const maxRetries = typeof this.config.retryCount === 'number' ? this.config.retryCount : 2;
+        const current = config.__retryCount || 0;
+        const shouldRetry = current < maxRetries && (
+          code === 'ECONNRESET' ||
+          code === 'EPROTO' ||
+          code.startsWith('ERR_SSL') ||
+          message.includes('disconnected before secure TLS connection')
+        );
+        if (shouldRetry) {
+          config.__retryCount = current + 1;
+          const base = 300;
+          const wait = Math.min(Math.floor(base * Math.pow(1.8, current)), 1200);
+          await new Promise((r) => setTimeout(r, wait));
+          return this.client.request(config);
+        }
         return Promise.reject(error);
       }
     );

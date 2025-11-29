@@ -396,7 +396,6 @@ export function parseActionSignal(actionSignalData: Buffer): DanmuMessage[] {
               const joinClub = AcFunDanmu.AcfunActionSignalJoinClub.decode(payload);
               const event = parseJoinClub(joinClub);
               events.push(event);
-              printDanmuEvent(event);
               break;
             }
             case 'CommonActionSignalUserShareLive': {
