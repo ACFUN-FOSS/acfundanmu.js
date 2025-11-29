@@ -23,7 +23,11 @@ export class AcFunLiveApi {
   public replay: ReplayService;
 
   constructor(config?: ApiConfig) {
-    this.httpClient = new HttpClient(config);
+    const defaultConfig: ApiConfig = {
+      retryCount: 3,
+      ...config
+    };
+    this.httpClient = new HttpClient(defaultConfig);
     this.auth = new AuthService(this.httpClient);
     this.badge = new BadgeService(this.httpClient);
     this.danmu = new DanmuService(this.httpClient);

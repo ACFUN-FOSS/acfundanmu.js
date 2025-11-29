@@ -109,18 +109,29 @@ export class HttpClient {
         const config: any = error?.config || {};
         const message: string = error?.message || '';
         const code: string = error?.code || '';
-        const maxRetries = typeof this.config.retryCount === 'number' ? this.config.retryCount : 2;
+        const maxRetries = typeof this.config.retryCount === 'number' ? this.config.retryCount : 3;
         const current = config.__retryCount || 0;
-        const shouldRetry = current < maxRetries && (
-          code === 'ECONNRESET' ||
-          code === 'EPROTO' ||
-          code.startsWith('ERR_SSL') ||
-          message.includes('disconnected before secure TLS connection')
-        );
+        
+        // Determine if we should retry
+        // Retry on:
+        // 1. Network errors (no response)
+        // 2. Server errors (5xx)
+        // 3. Rate limiting (429)
+        // 4. Specific connection errors (original logic)
+        const isNetworkError = !error.response;
+        const isServerError = error.response && (error.response.status >= 500 || error.response.status === 429);
+        const isConnectionError = code === 'ECONNRESET' || 
+                                 code === 'EPROTO' || 
+                                 code === 'ETIMEDOUT' ||
+                                 code?.startsWith('ERR_SSL') || 
+                                 message?.includes('disconnected before secure TLS connection');
+
+        const shouldRetry = current < maxRetries && (isNetworkError || isServerError || isConnectionError);
+        
         if (shouldRetry) {
           config.__retryCount = current + 1;
           const base = 300;
-          const wait = Math.min(Math.floor(base * Math.pow(1.8, current)), 1200);
+          const wait = Math.min(Math.floor(base * Math.pow(1.8, current)), 2000); // Cap wait time at 2s
           await new Promise((r) => setTimeout(r, wait));
           return this.client.request(config);
         }
