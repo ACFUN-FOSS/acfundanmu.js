@@ -1875,6 +1875,13 @@ export class LiveService {
     const data = response.data;
     const list = Array.isArray(data?.list) ? data.list : [];
 
+    if (process.env.WATCHING_LIST_DEBUG === '1') {
+      try {
+        console.log('watchingList 原始响应:', data);
+        console.log('watchingList 原始观众项样例:', Array.isArray(list) ? list.slice(0, 5) : list);
+      } catch {}
+    }
+
     const users: WatchingUser[] = list.map((item: any) => ({
       userInfo: {
         userID: Number(item?.userId) || 0,
