@@ -115,7 +115,7 @@ export class DanmuService {
   /**
    * 开始获取弹幕
    */
-  public async startDanmu(liverUID: string, callback: (event: DanmuMessage) => void, captureRaw: boolean = false): Promise<ApiResponse<{ sessionId: string }>> {
+  public async startDanmu(liverUID: string, callback: (event: DanmuMessage) => void, captureRaw: boolean = false): Promise<ApiResponse<{ sessionId: string; liverUID: number; StreamInfo?: any }>> {
     try {
       // 阶段一：初始化与验证
       if (!liverUID || typeof liverUID !== 'string') {
@@ -153,7 +153,7 @@ export class DanmuService {
         };
       }
 
-      const { liveID, enterRoomAttach, tickets } = liveInfoResult.data;
+      const { liveID, enterRoomAttach, tickets, StreamInfo } = liveInfoResult.data;
 
       // 生成会话 ID
       const sessionId = this.generateSessionId();
@@ -197,7 +197,7 @@ export class DanmuService {
 
       return {
         success: true,
-        data: { sessionId }
+        data: { sessionId, liverUID: Number(liverUID), StreamInfo }
       };
     } catch (error) {
       return {
@@ -292,7 +292,7 @@ export class DanmuService {
   /**
    * 获取直播 token
    */
-  private async getLiveToken(liverUID: string, tokenInfo: TokenInfo): Promise<ApiResponse<{ liveID: string; enterRoomAttach: string; tickets: string[] }>> {
+  private async getLiveToken(liverUID: string, tokenInfo: TokenInfo): Promise<ApiResponse<{ liveID: string; enterRoomAttach: string; tickets: string[]; StreamInfo?: any }>> {
     try {
       // 根据Go代码，需要在URL中包含userId、did和服务token
       const midgroundSt = 'acfun.midground.api_st';
@@ -330,11 +330,37 @@ export class DanmuService {
         };
       }
 
-      // 关键字段（对照Go代码init.go:266-274）
       const liveID = data.data?.liveId;
-      const enterRoomAttach = data.data?.enterRoomAttach || '';  // 进入房间的附加数据，必需字段
+      const enterRoomAttach = data.data?.enterRoomAttach || '';
       const availableTickets = data.data?.availableTickets || [];
-      
+
+      const caption = data.data?.caption || '';
+      const liveStartTime = Number(data.data?.liveStartTime || 0);
+      const panoramic = Boolean(data.data?.panoramic || false);
+
+      let StreamInfo: any | undefined = undefined;
+      try {
+        const videoPlayResStr = data.data?.videoPlayRes || '';
+        if (videoPlayResStr) {
+          const vpr = JSON.parse(videoPlayResStr);
+          const streamName = String(vpr.streamName || '');
+          const reps = vpr?.liveAdaptiveManifest?.[0]?.adaptationSet?.representation || [];
+          const streamList = reps.map((r: any) => ({
+            url: String(r.url || ''),
+            bitrate: Number(r.bitrate || 0),
+            qualityType: String(r.qualityType || ''),
+            qualityName: String(r.name || '')
+          }));
+          StreamInfo = {
+            liveID,
+            title: caption,
+            liveStartTime,
+            panoramic,
+            streamList,
+            streamName
+          };
+        }
+      } catch {}
 
       if (!liveID) {
         return {
@@ -348,7 +374,8 @@ export class DanmuService {
         data: {
           liveID,
           enterRoomAttach,
-          tickets: availableTickets
+          tickets: availableTickets,
+          StreamInfo
         }
       };
     } catch (error) {
