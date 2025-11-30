@@ -42,7 +42,6 @@ function parseUserInfo(userInfoData) {
             }
         }
         catch (e) {
-            // ignore parsing error
         }
     }
     return {
