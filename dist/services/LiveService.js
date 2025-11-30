@@ -1526,8 +1526,29 @@ class LiveService {
                 userID: Number(item?.userId) || 0,
                 nickname: String(item?.nickname || ''),
                 avatar: (Array.isArray(item?.avatar) && item.avatar[0]?.url) ? String(item.avatar[0].url) : '',
-                medal: { uperID: 0, userID: 0, clubName: '', level: 0 },
-                managerType: (item?.managerType ?? 0),
+                medal: (() => {
+                    let m = { uperID: 0, userID: 0, clubName: '', level: 0 };
+                    const badge = item?.badge;
+                    if (badge) {
+                        try {
+                            const parsed = JSON.parse(badge);
+                            const mi = parsed?.medalInfo;
+                            if (mi) {
+                                m = {
+                                    uperID: Number(mi.uperId || 0),
+                                    userID: Number(mi.userId || 0),
+                                    clubName: String(mi.clubName || ''),
+                                    level: Number(mi.level || 0),
+                                };
+                            }
+                        }
+                        catch { }
+                    }
+                    return m;
+                })(),
+                managerType: (typeof item?.managerType === 'string'
+                    ? ((item.managerType === 'NORMAL') ? 1 : 0)
+                    : Number(item?.managerType ?? 0)),
             },
             anonymousUser: item?.anonymousUser === true,
             displaySendAmount: String(item?.displaySendAmount ?? ''),
