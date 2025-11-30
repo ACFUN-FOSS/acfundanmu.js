@@ -130,7 +130,7 @@ class DanmuService {
                     error: liveInfoResult.error || '获取直播 token 失败'
                 };
             }
-            const { liveID, enterRoomAttach, tickets } = liveInfoResult.data;
+            const { liveID, enterRoomAttach, tickets, StreamInfo } = liveInfoResult.data;
             // 生成会话 ID
             const sessionId = this.generateSessionId();
             // 创建会话
@@ -168,7 +168,7 @@ class DanmuService {
             }
             return {
                 success: true,
-                data: { sessionId }
+                data: { sessionId, liverUID: Number(liverUID), StreamInfo }
             };
         }
         catch (error) {
@@ -263,10 +263,36 @@ class DanmuService {
                     error: `获取直播 token 失败: ${data.error_msg || '未知错误'}`
                 };
             }
-            // 关键字段（对照Go代码init.go:266-274）
             const liveID = data.data?.liveId;
-            const enterRoomAttach = data.data?.enterRoomAttach || ''; // 进入房间的附加数据，必需字段
+            const enterRoomAttach = data.data?.enterRoomAttach || '';
             const availableTickets = data.data?.availableTickets || [];
+            const caption = data.data?.caption || '';
+            const liveStartTime = Number(data.data?.liveStartTime || 0);
+            const panoramic = Boolean(data.data?.panoramic || false);
+            let StreamInfo = undefined;
+            try {
+                const videoPlayResStr = data.data?.videoPlayRes || '';
+                if (videoPlayResStr) {
+                    const vpr = JSON.parse(videoPlayResStr);
+                    const streamName = String(vpr.streamName || '');
+                    const reps = vpr?.liveAdaptiveManifest?.[0]?.adaptationSet?.representation || [];
+                    const streamList = reps.map((r) => ({
+                        url: String(r.url || ''),
+                        bitrate: Number(r.bitrate || 0),
+                        qualityType: String(r.qualityType || ''),
+                        qualityName: String(r.name || '')
+                    }));
+                    StreamInfo = {
+                        liveID,
+                        title: caption,
+                        liveStartTime,
+                        panoramic,
+                        streamList,
+                        streamName
+                    };
+                }
+            }
+            catch { }
             if (!liveID) {
                 return {
                     success: false,
@@ -278,7 +304,8 @@ class DanmuService {
                 data: {
                     liveID,
                     enterRoomAttach,
-                    tickets: availableTickets
+                    tickets: availableTickets,
+                    StreamInfo
                 }
             };
         }

@@ -23,6 +23,8 @@ export declare class DanmuService {
      */
     startDanmu(liverUID: string, callback: (event: DanmuMessage) => void, captureRaw?: boolean): Promise<ApiResponse<{
         sessionId: string;
+        liverUID: number;
+        StreamInfo?: any;
     }>>;
     /**
      * 停止获取弹幕
