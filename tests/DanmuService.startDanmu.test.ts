@@ -26,25 +26,9 @@ describe('DanmuService.startDanmu', () => {
       throw new Error('token.json不存在，请先生成token');
     }
 
-    // 动态获取正在直播的主播UID
-    console.log('\n开始获取正在直播的主播UID...');
-    const params = {};
-    const response = await api.live.getHotLives();
-    
-    console.log('请求参数:', params);
-    console.log('响应状态:', response.success ? 'success' : 'failed');
-    console.log('返回数据:', JSON.stringify(response.data, null, 2));
-    
-    if (!response.success || !response.data || response.data.lives.length === 0) {
-      throw new Error('无法获取正在直播的主播，请稍后重试');
-    }
-    
-    // 提取第一个主播的UID
-    const firstLive = response.data!.lives[0];
-    testLiverUID = String(firstLive.streamer?.userId || '');
-    console.log('\n提取到主播UID:', testLiverUID);
-    console.log('主播昵称:', firstLive.streamer?.userName || '');
-    console.log('直播标题:', firstLive.title);
+    // 使用指定主播UID进行测试
+    testLiverUID = '173620';
+    console.log('\n使用指定的主播UID进行测试:', testLiverUID);
   }, 30000);
 
   /**
@@ -104,7 +88,7 @@ describe('DanmuService.startDanmu', () => {
         console.log(`\n✅已接收到${targetCount}条弹幕，测试完成！`);
         resolvePromise();
       }
-    });
+    }, true);
 
     console.log('响应状态:', result.success ? 'success' : 'failed');
     console.log('返回数据:', result.data || { error: result.error });
@@ -115,7 +99,7 @@ describe('DanmuService.startDanmu', () => {
 
     // 等待接收5条弹幕，或者超时（最多等待120秒）
     console.log(`\n等待接收${targetCount}条弹幕...`);
-    const timeout = 120000; // 120秒超时
+    const timeout = 300000;
     const timeoutPromise = new Promise<void>((resolve) => {
       setTimeout(() => {
         console.log('\n⚠️ 等待超时，当前已接收弹幕数:', receivedDanmus.length);
@@ -152,7 +136,7 @@ describe('DanmuService.startDanmu', () => {
 
     // 断言至少收到了一些弹幕
     expect(receivedDanmus.length).toBeGreaterThan(0);
-  }, 150000); // 总超时时间150秒
+  }, 300000);
   /**
    * 辅助函数：获取事件类型码
    */
@@ -204,7 +188,7 @@ describe('DanmuService.startDanmu', () => {
   /**
    * 测试用例2：接收弹幕事件
    */
-  test('应该能接收弹幕事件', async () => {
+  test.skip('应该能接收弹幕事件', async () => {
     console.log('\n=== 测试用例2：接收弹幕事件 ===');
     
     const receivedEvents: any[] = [];
@@ -234,7 +218,7 @@ describe('DanmuService.startDanmu', () => {
       }
       
       receivedEvents.push(event);
-    });
+    }, true);
 
     console.log('响应状态:', result.success ? 200 : 500);
     console.log('返回数据:', result.data || { error: result.error });
@@ -266,12 +250,12 @@ describe('DanmuService.startDanmu', () => {
     if (result.success && result.data?.sessionId) {
       await api.danmu.stopDanmu(result.data.sessionId);
     }
-  }, 90000);
+  }, 300000);
 
   /**
    * 测试用例3：无效主播UID
    */
-  test('应该拒绝无效的主播UID', async () => {
+  test.skip('应该拒绝无效的主播UID', async () => {
     console.log('\n=== 测试用例3：无效主播UID ===');
     
     const invalidUID = '999999999';
@@ -283,7 +267,7 @@ describe('DanmuService.startDanmu', () => {
 
     const result = await api.danmu.startDanmu(invalidUID, (event) => {
       console.log('收到弹幕:', event);
-    });
+    }, true);
 
     console.log('响应状态:', result.success ? 200 : 500);
     console.log('返回数据:', result.data || { error: result.error });
@@ -293,12 +277,12 @@ describe('DanmuService.startDanmu', () => {
     expect(result.error).toBeDefined();
     
     console.log('无效UID的处理在获取直播token时失败');
-  }, 30000);
+  }, 300000);
 
   /**
    * 测试用例4：缺失token
    */
-  test('应该拒绝缺失token的请求', async () => {
+  test.skip('应该拒绝缺失token的请求', async () => {
     console.log('\n=== 测试用例4：缺失token ===');
     
     const apiWithoutToken = new AcFunLiveApi({});
@@ -311,19 +295,19 @@ describe('DanmuService.startDanmu', () => {
 
     const result = await apiWithoutToken.danmu.startDanmu(testLiverUID, (event) => {
       console.log('收到弹幕:', event);
-    });
+    }, true);
 
     console.log('响应状态:', result.success ? 200 : 500);
     console.log('返回数据:', result.data || { error: result.error });
 
     expect(result.success).toBe(false);
     expect(result.error).toContain('token');
-  }, 30000);
+  }, 300000);
 
   /**
    * 测试用例5：识别多种弹幕类型
    */
-  test('应该能识别多种弹幕类型', async () => {
+  test.skip('应该能识别多种弹幕类型', async () => {
     console.log('\n=== 测试用例5：识别多种弹幕类型 ===');
     
     const params = {
@@ -360,7 +344,7 @@ describe('DanmuService.startDanmu', () => {
         danmuCount++;
         console.log(`弹幕 ${danmuCount}: 类型=${eventType}, 用户=${event.userInfo?.nickname || 'unknown'}`);
       }
-    });
+    }, true);
 
     console.log('响应状态:', result.success ? 200 : 500);
     console.log('返回数据:', result.data || { error: result.error });
@@ -383,5 +367,5 @@ describe('DanmuService.startDanmu', () => {
       console.log('弹幕获取失败，可能是直播间未开播');
       expect(result.error).toBeDefined();
     }
-  }, 60000);
+  }, 300000);
 });

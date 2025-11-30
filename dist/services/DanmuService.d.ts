@@ -21,7 +21,7 @@ export declare class DanmuService {
     /**
      * 开始获取弹幕
      */
-    startDanmu(liverUID: string, callback: (event: DanmuMessage) => void): Promise<ApiResponse<{
+    startDanmu(liverUID: string, callback: (event: DanmuMessage) => void, captureRaw?: boolean): Promise<ApiResponse<{
         sessionId: string;
     }>>;
     /**
@@ -88,6 +88,7 @@ export declare class DanmuService {
      * 发送推送消息响应
      */
     private sendPushMessageResponse;
+    private saveRawOnce;
     /**
      * 启动心跳
      */

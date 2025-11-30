@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ErrorCode = exports.ErrorType = exports.ChatEndType = exports.ChatMediaType = exports.SharePlatformType = exports.ManagerType = exports.DanmuSessionState = void 0;
+exports.ErrorCode = exports.ErrorType = exports.ChatEndType = exports.ChatMediaType = exports.SharePlatformType = exports.ManagerState = exports.ManagerType = exports.DanmuSessionState = void 0;
 // 弹幕会话相关类型
 var DanmuSessionState;
 (function (DanmuSessionState) {
@@ -18,6 +18,14 @@ var ManagerType;
     ManagerType[ManagerType["NotManager"] = 0] = "NotManager";
     ManagerType[ManagerType["NormalManager"] = 1] = "NormalManager";
 })(ManagerType || (exports.ManagerType = ManagerType = {}));
+// 管理员状态枚举
+var ManagerState;
+(function (ManagerState) {
+    ManagerState[ManagerState["Unknown"] = 0] = "Unknown";
+    ManagerState[ManagerState["Added"] = 1] = "Added";
+    ManagerState[ManagerState["Removed"] = 2] = "Removed";
+    ManagerState[ManagerState["IsManager"] = 3] = "IsManager";
+})(ManagerState || (exports.ManagerState = ManagerState = {}));
 // 分享平台类型
 var SharePlatformType;
 (function (SharePlatformType) {

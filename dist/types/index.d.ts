@@ -203,7 +203,17 @@ export declare enum ManagerType {
     NotManager = 0,
     NormalManager = 1
 }
-export type DanmuEventType = 'comment' | 'like' | 'enter_room' | 'follow' | 'throw_banana' | 'gift' | 'rich_text' | 'join_club' | 'share_live';
+export type DanmuEventType = 'comment' | 'like' | 'enter_room' | 'follow' | 'throw_banana' | 'gift' | 'rich_text' | 'join_club' | 'share_live' | 'manager_state';
+export declare enum ManagerState {
+    Unknown = 0,
+    Added = 1,
+    Removed = 2,
+    IsManager = 3
+}
+export interface ManagerStateSignal {
+    type: 'manager_state';
+    state: ManagerState;
+}
 export interface DanmuSession {
     sessionId: string;
     liverUID: string;
@@ -219,6 +229,8 @@ export interface DanmuSession {
     ticketIndex: number;
     state: DanmuSessionState;
     callback: (event: DanmuMessage) => void;
+    captureRaw: boolean;
+    savedRawTypes: Set<string>;
 }
 export interface UserInfo {
     userID: number;

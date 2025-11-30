@@ -50,6 +50,8 @@ import { HealthCheckManager } from '../core/HealthCheckManager';
 import { SessionManager } from '../core/SessionManager';
 import { GiftService } from './GiftService';
 import { GiftRegistry } from './GiftRegistry';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export class DanmuService {
   private httpClient: HttpClient;
@@ -113,7 +115,7 @@ export class DanmuService {
   /**
    * 开始获取弹幕
    */
-  public async startDanmu(liverUID: string, callback: (event: DanmuMessage) => void): Promise<ApiResponse<{ sessionId: string }>> {
+  public async startDanmu(liverUID: string, callback: (event: DanmuMessage) => void, captureRaw: boolean = false): Promise<ApiResponse<{ sessionId: string }>> {
     try {
       // 阶段一：初始化与验证
       if (!liverUID || typeof liverUID !== 'string') {
@@ -170,7 +172,9 @@ export class DanmuService {
         heartbeatSeqID: 0,
         ticketIndex: 0,
         state: DanmuSessionState.Idle,
-        callback
+        callback,
+        captureRaw,
+        savedRawTypes: new Set<string>()
       };
 
       this.sessions.set(sessionId, session);
@@ -696,24 +700,66 @@ export class DanmuService {
       switch (messageType) {
         case 'ZtLiveScActionSignal':
           if (messagePayload) {
+            if (session.captureRaw) {
+              try {
+                const action = AcFunDanmu.ZtLiveScActionSignal.decode(Buffer.from(messagePayload))
+                if (action.item) {
+                  for (const it of action.item) {
+                    const t = String(it.signalType || '')
+                    for (const p of (it.payload || [])) {
+                      await this.saveRawOnce(session, 'Action', t, p as Uint8Array)
+                    }
+                  }
+                }
+              } catch {}
+            }
             this.handleActionSignal(session, Buffer.from(messagePayload));
           }
           break;
           
         case 'ZtLiveScStateSignal':
           if (messagePayload) {
+            if (session.captureRaw) {
+              try {
+                const state = AcFunDanmu.ZtLiveScStateSignal.decode(Buffer.from(messagePayload))
+                if (state.item) {
+                  for (const it of state.item) {
+                    const t = String(it.signalType || '')
+                    await this.saveRawOnce(session, 'State', t, it.payload as Uint8Array)
+                  }
+                }
+              } catch {}
+            }
             this.handleStateSignal(session, Buffer.from(messagePayload));
           }
           break;
           
         case 'ZtLiveScNotifySignal':
           if (messagePayload) {
+            if (session.captureRaw) {
+              try {
+                const notify = AcFunDanmu.ZtLiveScNotifySignal.decode(Buffer.from(messagePayload))
+                if (notify.item) {
+                  for (const it of notify.item) {
+                    const t = String(it.signalType || '')
+                    await this.saveRawOnce(session, 'Notify', t, it.payload as Uint8Array)
+                  }
+                }
+              } catch {}
+            }
             this.handleNotifySignal(session, Buffer.from(messagePayload));
           }
           break;
           
         case 'ZtLiveScStatusChanged':
           if (messagePayload) {
+            if (session.captureRaw) {
+              try {
+                const status = AcFunDanmu.ZtLiveScStatusChanged.decode(Buffer.from(messagePayload))
+                const t = `StatusChanged.${String(status.type || 0)}`
+                await this.saveRawOnce(session, 'Status', t, Buffer.from(messagePayload))
+              } catch {}
+            }
             this.handleStatusChanged(session, Buffer.from(messagePayload));
           }
           break;
@@ -987,6 +1033,20 @@ export class DanmuService {
     );
     
     ws.send(frame);
+  }
+
+  private async saveRawOnce(session: DanmuSession, category: string, signalType: string, payload: Uint8Array | Buffer): Promise<void> {
+    try {
+      if (!session.captureRaw) return;
+      const key = `${category}.${signalType}`;
+      if (session.savedRawTypes.has(key)) return;
+      const dir = path.join(process.cwd(), 'raw-danmu', String(session.liveID));
+      await fs.promises.mkdir(dir, { recursive: true });
+      const file = path.join(dir, `${category}.${signalType}.b64`);
+      const buf = Buffer.isBuffer(payload) ? payload : Buffer.from(payload);
+      await fs.promises.writeFile(file, buf.toString('base64'), 'utf8');
+      session.savedRawTypes.add(key);
+    } catch {}
   }
   
   /**

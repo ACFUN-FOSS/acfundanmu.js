@@ -19,16 +19,34 @@ import { AcFunDanmu } from '../proto/acfun';
  * 解析用户信息
  */
 export function parseUserInfo(userInfoData: AcFunDanmu.IZtLiveUserInfo): UserInfo {
+  let medal = {
+    uperID: 0,
+    userID: 0,
+    clubName: '',
+    level: 0
+  };
+
+  if (userInfoData.badge) {
+    try {
+      const badgeInfo = JSON.parse(userInfoData.badge);
+      if (badgeInfo.medalInfo) {
+        medal = {
+          uperID: Number(badgeInfo.medalInfo.uperId || 0),
+          userID: Number(badgeInfo.medalInfo.userId || 0),
+          clubName: badgeInfo.medalInfo.clubName || '',
+          level: Number(badgeInfo.medalInfo.level || 0)
+        };
+      }
+    } catch (e) {
+      // ignore parsing error
+    }
+  }
+
   return {
     userID: Number(userInfoData.userId || 0),
     nickname: userInfoData.nickname || '',
     avatar: (userInfoData.avatar && userInfoData.avatar.length > 0) ? (userInfoData.avatar[0].url || '') : '',
-    medal: {
-      uperID: 0,
-      userID: 0,
-      clubName: '',
-      level: 0
-    },
+    medal,
     managerType: (userInfoData.userIdentity?.managerType as number) || ManagerType.NotManager
   };
 }
@@ -503,7 +521,7 @@ export function parseNotifySignal(notifySignalData: Buffer): any[] {
         }
         case 'CommonNotifySignalLiveManagerState': {
           const ms = AcFunDanmu.CommonNotifySignalLiveManagerState.decode(item.payload as Uint8Array)
-          events.push({ type: 'managerState', data: Number(ms.state || 0) })
+          events.push({ type: 'manager_state', state: ms.state || 0 })
           break
         }
         default: {

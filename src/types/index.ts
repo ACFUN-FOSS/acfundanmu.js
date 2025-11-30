@@ -244,7 +244,22 @@ export type DanmuEventType =
   | 'gift'
   | 'rich_text'
   | 'join_club'
-  | 'share_live';
+  | 'share_live'
+  | 'manager_state';
+
+// 管理员状态枚举
+export enum ManagerState {
+  Unknown = 0,
+  Added = 1,
+  Removed = 2,
+  IsManager = 3
+}
+
+// 管理员状态通知
+export interface ManagerStateSignal {
+  type: 'manager_state';
+  state: ManagerState;
+}
 
 // 弹幕会话
 export interface DanmuSession {
@@ -262,6 +277,8 @@ export interface DanmuSession {
   ticketIndex: number;
   state: DanmuSessionState;
   callback: (event: DanmuMessage) => void;
+  captureRaw: boolean;
+  savedRawTypes: Set<string>;
 }
 
 // 用户信息

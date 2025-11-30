@@ -1,0 +1,25 @@
+{
+  "userInfo": {
+    "userId": "214844",
+    "nickname": "朝灵ACFUN唯一指定三次元老公",
+    "avatar": [
+      {
+        "cdn": "unknown",
+        "url": "https://imgs.aixifan.com/FsKfHpfsYWpWRGkZDsS_emNN_Agj",
+        "urlPattern": "https://imgs.aixifan.com/FsKfHpfsYWpWRGkZDsS_emNN_Agj"
+      }
+    ],
+    "badge": "{\"medalInfo\":{\"uperId\":23682490,\"userId\":214844,\"clubName\":\"ACER\",\"level\":8}}",
+    "userIdentity": {
+      "managerType": "NORMAL"
+    }
+  },
+  "sendTimeMs": "1764479376396",
+  "giftId": "1",
+  "batchSize": 1,
+  "comboCount": 1,
+  "rank": "1",
+  "comboKey": "1_1_1764479376069",
+  "slotDisplayDurationMs": "3000",
+  "expireDurationMs": "300000"
+}

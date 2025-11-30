@@ -1,0 +1,51 @@
+{
+  "user": [
+    {
+      "userInfo": {
+        "userId": "282301",
+        "nickname": "着逝者为铠",
+        "avatar": [
+          {
+            "cdn": "unknown",
+            "url": "https://imgs.aixifan.com/content/2020_4_20/1.5873824636336868E9.gif",
+            "urlPattern": "https://imgs.aixifan.com/content/2020_4_20/1.5873824636336868E9.gif"
+          }
+        ]
+      },
+      "customWatchingListData": "{\"userInfo\":{\"verified\":0,\"verifiedTypes\":[],\"joinUpCollege\":false},\"countInfo\":{\"fansCount\":108}}",
+      "displaySendAmount": "6"
+    },
+    {
+      "userInfo": {
+        "userId": "214844",
+        "nickname": "朝灵ACFUN唯一指定三次元老公",
+        "avatar": [
+          {
+            "cdn": "unknown",
+            "url": "https://imgs.aixifan.com/FsKfHpfsYWpWRGkZDsS_emNN_Agj",
+            "urlPattern": "https://imgs.aixifan.com/FsKfHpfsYWpWRGkZDsS_emNN_Agj"
+          }
+        ]
+      },
+      "customWatchingListData": "{\"userInfo\":{\"verified\":0,\"verifiedTypes\":[],\"joinUpCollege\":false},\"countInfo\":{\"fansCount\":169}}",
+      "displaySendAmount": "2"
+    },
+    {
+      "userInfo": {
+        "userId": "1000000255717869",
+        "nickname": "二十有八载の刘福勇",
+        "avatar": [
+          {
+            "cdn": "unknown",
+            "url": "https://imgs.aixifan.com/style/image/defaultAvatar.jpg",
+            "urlPattern": "https://imgs.aixifan.com/style/image/defaultAvatar.jpg"
+          }
+        ],
+        "f": true
+      },
+      "customWatchingListData": "{\"userInfo\":{\"verified\":0,\"verifiedTypes\":[],\"joinUpCollege\":false},\"countInfo\":{\"fansCount\":0}}",
+      "displaySendAmount": "0",
+      "anonymousUser": true
+    }
+  ]
+}
