@@ -38,7 +38,6 @@ export function parseUserInfo(userInfoData: AcFunDanmu.IZtLiveUserInfo): UserInf
         };
       }
     } catch (e) {
-      // ignore parsing error
     }
   }
 
