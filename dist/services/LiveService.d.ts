@@ -1,5 +1,5 @@
 import { HttpClient } from '../core/HttpClient';
-import { ApiResponse, LiveRoomInfo, WatchingUser } from '../types';
+import { ApiResponse, LiveRoomInfo, WatchingUser, LiveChannelFilter, LiveChannelListResponse } from '../types';
 export declare class LiveService {
     private httpClient;
     constructor(httpClient: HttpClient);
@@ -244,4 +244,25 @@ export declare class LiveService {
         bananaCount: number;
     }>>;
     getWatchingList(liveId: string): Promise<ApiResponse<WatchingUser[]>>;
+    /**
+     * 获取直播列表（支持分类筛选）
+     * @param options 选项参数
+     * @param options.filters 筛选器数组，例如：[{filterType: 1, filterId: 0}] 表示全部分类
+     * @param options.count 每页数量，默认100
+     * @param options.pcursor 分页游标，默认空字符串
+     * @returns 直播列表响应
+     *
+     * 分类筛选说明：
+     * - {filterType: 3, filterId: 0} - 关注
+     * - {filterType: 1, filterId: 0} - 全部
+     * - {filterType: 1, filterId: 4} - 虚拟偶像
+     * - {filterType: 1, filterId: 1} - 游戏
+     * - {filterType: 1, filterId: 3} - 娱乐
+     * - {filterType: 1, filterId: 2} - 其他
+     */
+    getChannelList(options?: {
+        filters?: LiveChannelFilter[];
+        count?: number;
+        pcursor?: string;
+    }): Promise<ApiResponse<LiveChannelListResponse>>;
 }

@@ -1,6 +1,6 @@
 {
   "name": "acfunlive-http-api",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "AcFun直播HTTP API库 - 基于Go版本移植的JavaScript实现",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

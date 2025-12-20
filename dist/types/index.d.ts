@@ -526,3 +526,41 @@ export declare enum ErrorCode {
     RESOURCE_EXHAUSTED = 5002,
     CONFIG_ERROR = 5003
 }
+export interface LiveChannelFilter {
+    filterType: number;
+    filterId: number;
+}
+export interface LiveChannelItem {
+    liveId: string;
+    authorId: number;
+    streamName: string;
+    title: string;
+    coverUrls: string[];
+    likeCount: number;
+    onlineCount: number;
+    formatLikeCount: string;
+    formatOnlineCount: string;
+    createTime: number;
+    portrait: boolean;
+    panoramic: boolean;
+    hasFansClub: boolean;
+    paidShowUserBuyStatus: boolean;
+    user: {
+        id: string;
+        name: string;
+        headUrl: string;
+        [key: string]: any;
+    };
+    type: {
+        id: number;
+        name: string;
+        categoryId: number;
+        categoryName: string;
+    };
+}
+export interface LiveChannelListResponse {
+    liveList: LiveChannelItem[];
+    totalCount: number;
+    pcursor: string;
+    count: number;
+}

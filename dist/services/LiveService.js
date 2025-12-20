@@ -1521,6 +1521,13 @@ class LiveService {
         }
         const data = response.data;
         const list = Array.isArray(data?.list) ? data.list : [];
+        if (process.env.WATCHING_LIST_DEBUG === '1') {
+            try {
+                console.log('watchingList 原始响应:', data);
+                console.log('watchingList 原始观众项样例:', Array.isArray(list) ? list.slice(0, 5) : list);
+            }
+            catch { }
+        }
         const users = list.map((item) => ({
             userInfo: {
                 userID: Number(item?.userId) || 0,
@@ -1555,6 +1562,108 @@ class LiveService {
             customData: String(item?.customWatchingListData ?? ''),
         }));
         return { success: true, data: users };
+    }
+    /**
+     * 获取直播列表（支持分类筛选）
+     * @param options 选项参数
+     * @param options.filters 筛选器数组，例如：[{filterType: 1, filterId: 0}] 表示全部分类
+     * @param options.count 每页数量，默认100
+     * @param options.pcursor 分页游标，默认空字符串
+     * @returns 直播列表响应
+     *
+     * 分类筛选说明：
+     * - {filterType: 3, filterId: 0} - 关注
+     * - {filterType: 1, filterId: 0} - 全部
+     * - {filterType: 1, filterId: 4} - 虚拟偶像
+     * - {filterType: 1, filterId: 1} - 游戏
+     * - {filterType: 1, filterId: 3} - 娱乐
+     * - {filterType: 1, filterId: 2} - 其他
+     */
+    async getChannelList(options) {
+        try {
+            // 设置默认参数
+            const count = options?.count ?? 100;
+            const pcursor = options?.pcursor ?? '';
+            // 构建请求URL
+            const url = new URL('https://live.acfun.cn/api/channel/list');
+            url.searchParams.append('count', count.toString());
+            url.searchParams.append('pcursor', pcursor);
+            // 处理filters参数：需要JSON序列化后URL编码
+            if (options?.filters && options.filters.length > 0) {
+                const filtersJson = JSON.stringify(options.filters);
+                url.searchParams.append('filters', filtersJson);
+            }
+            // 设置请求头
+            const headers = (0, ApiUtils_1.buildCommonHeaders)();
+            headers['Referer'] = 'https://live.acfun.cn/';
+            // 使用apiGet发送请求
+            const response = await (0, ApiUtils_1.apiGet)(this.httpClient, url.toString(), '获取直播列表');
+            if (!response.success) {
+                return response;
+            }
+            const data = response.data;
+            // 验证响应结构：检查channelListData是否存在
+            if (!data || !data.channelListData) {
+                return {
+                    success: false,
+                    error: 'API响应结构无效：缺少channelListData字段'
+                };
+            }
+            const channelListData = data.channelListData;
+            // 验证API调用结果：result === 0 表示成功
+            if (channelListData.result !== 0) {
+                return {
+                    success: false,
+                    error: `API调用失败，result: ${channelListData.result}`
+                };
+            }
+            // 解析直播列表数据
+            const liveList = (channelListData.liveList || []).map((live) => ({
+                liveId: live.liveId || '',
+                authorId: live.authorId || 0,
+                streamName: live.streamName || '',
+                title: live.title || '',
+                coverUrls: Array.isArray(live.coverUrls) ? live.coverUrls : [],
+                likeCount: live.likeCount || 0,
+                onlineCount: live.onlineCount || 0,
+                formatLikeCount: live.formatLikeCount || '0',
+                formatOnlineCount: live.formatOnlineCount || '0',
+                createTime: live.createTime || 0,
+                portrait: live.portrait || false,
+                panoramic: live.panoramic || false,
+                hasFansClub: live.hasFansClub || false,
+                paidShowUserBuyStatus: live.paidShowUserBuyStatus || false,
+                user: {
+                    id: live.user?.id || '',
+                    name: live.user?.name || '',
+                    headUrl: live.user?.headUrl || '',
+                    ...live.user // 保留其他用户字段
+                },
+                type: {
+                    id: live.type?.id || 0,
+                    name: live.type?.name || '',
+                    categoryId: live.type?.categoryId || 0,
+                    categoryName: live.type?.categoryName || ''
+                }
+            }));
+            // 构建响应数据
+            const result = {
+                liveList,
+                totalCount: channelListData.totalCount || liveList.length,
+                pcursor: channelListData.pcursor || '',
+                count: channelListData.count || liveList.length
+            };
+            return {
+                success: true,
+                data: result
+            };
+        }
+        catch (error) {
+            return {
+                success: false,
+                error: `获取直播列表失败: ${error instanceof Error ? error.message : String(error)}`
+            };
+        }
     }
 }
 exports.LiveService = LiveService;
