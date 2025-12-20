@@ -18,7 +18,7 @@
 ### 完整功能
 - **用户认证**：二维码登录、Token管理
 - **弹幕服务**：实时接收评论、礼物、进房等各类弹幕事件
-- **直播管理**：开播、停播、推流配置、状态查询
+- **直播管理**：开播、停播、推流配置、状态查询、直播列表分类筛选
 - **用户服务**：用户信息查询、钱包管理
 - **礼物系统**：礼物列表查询
 - **房管功能**：房管管理、踢人功能
@@ -101,6 +101,13 @@ const danmuResult = await api.danmu.startDanmu('主播UID', (event) => {
 });
 
 console.log('弹幕会话已启动:', danmuResult.data.sessionId);
+
+// 获取直播列表（支持分类筛选）
+const channelList = await api.live.getChannelList({
+  filters: [{ filterType: 1, filterId: 4 }], // 虚拟偶像分类
+  count: 20
+});
+console.log('直播列表:', channelList.data?.liveList);
 ```
 
 更多详细示例请查看 [使用示例文档](./docs/examples.md)。

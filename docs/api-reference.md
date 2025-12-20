@@ -231,6 +231,61 @@ StreamUrl {
 - `page?: number` - 页码(默认0)
  - `size?: number` - 每页数量(默认20)
 
+### getChannelList - 获取直播列表（支持分类筛选）
+
+获取直播列表，支持通过筛选器按分类筛选。
+
+**参数：**
+```typescript
+{
+  filters?: LiveChannelFilter[];  // 筛选器数组
+  count?: number;                  // 每页数量，默认100
+  pcursor?: string;                // 分页游标，默认空字符串
+}
+```
+
+**筛选器类型：**
+```typescript
+interface LiveChannelFilter {
+  filterType: number;  // 1: 分类, 3: 关注
+  filterId: number;     // 0: 全部/关注, 1: 游戏, 2: 其他, 3: 娱乐, 4: 虚拟偶像
+}
+```
+
+**分类筛选说明：**
+- `{filterType: 3, filterId: 0}` - 关注
+- `{filterType: 1, filterId: 0}` - 全部
+- `{filterType: 1, filterId: 4}` - 虚拟偶像
+- `{filterType: 1, filterId: 1}` - 游戏
+- `{filterType: 1, filterId: 3}` - 娱乐
+- `{filterType: 1, filterId: 2}` - 其他
+
+**响应：**
+```typescript
+{
+  liveList: LiveChannelItem[];
+  totalCount: number;
+  pcursor: string;
+  count: number;
+}
+```
+
+**示例：**
+```typescript
+// 获取虚拟偶像分类的直播列表
+const result = await api.live.getChannelList({
+  filters: [{ filterType: 1, filterId: 4 }],
+  count: 20
+});
+
+// 获取全部分类，带分页
+const result = await api.live.getChannelList({
+  filters: [{ filterType: 1, filterId: 0 }],
+  count: 100,
+  pcursor: ''
+});
+```
+
 ### getWatchingList - 获取直播间观众列表
 
 返回指定直播间的在线观众列表（最多 50）。

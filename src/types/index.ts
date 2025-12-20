@@ -665,3 +665,45 @@ export enum ErrorCode {
   RESOURCE_EXHAUSTED = 5002,
   CONFIG_ERROR = 5003
 }
+
+// 直播列表分类筛选相关类型
+export interface LiveChannelFilter {
+  filterType: number;  // 1: 分类, 3: 关注
+  filterId: number;    // 0: 全部/关注, 1: 游戏, 2: 其他, 3: 娱乐, 4: 虚拟偶像
+}
+
+export interface LiveChannelItem {
+  liveId: string;
+  authorId: number;
+  streamName: string;
+  title: string;
+  coverUrls: string[];
+  likeCount: number;
+  onlineCount: number;
+  formatLikeCount: string;
+  formatOnlineCount: string;
+  createTime: number;
+  portrait: boolean;
+  panoramic: boolean;
+  hasFansClub: boolean;
+  paidShowUserBuyStatus: boolean;
+  user: {
+    id: string;
+    name: string;
+    headUrl: string;
+    [key: string]: any;  // 其他用户字段
+  };
+  type: {
+    id: number;
+    name: string;
+    categoryId: number;
+    categoryName: string;
+  };
+}
+
+export interface LiveChannelListResponse {
+  liveList: LiveChannelItem[];
+  totalCount: number;
+  pcursor: string;
+  count: number;
+}
